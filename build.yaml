@@ -1,0 +1,59 @@
+targets:
+  $default:
+    sources:
+      - $package$
+      - lib/**
+      - graphql/**
+      - schema.graphql
+
+    builders:
+      json_serializable:
+        options:
+          include_if_null: false
+          nullable: true
+
+      artemis:
+        options:
+          fragments_glob: graphql/fragments.graphql
+          schema_mapping:
+            - schema: schema.graphql
+              queries_glob: graphql/operations/**/*.graphql
+              output: lib/generated/graphql/api.graphql.dart
+              naming_scheme: pathedWithFields
+
+          scalar_mapping:
+            - graphql_type: timestamptz
+              dart_type: DateTime
+
+            - graphql_type: timestamp
+              dart_type: DateTime
+
+            - graphql_type: uuid
+              dart_type: String
+
+            - graphql_type: date
+              dart_type: DateTime
+
+            - graphql_type: numeric
+              dart_type: double
+
+            - graphql_type: interval
+              dart_type: String
+
+            - graphql_type: float8
+              dart_type: double
+
+            - graphql_type: geometry
+              dart_type: Map
+
+            - graphql_type: geography
+              dart_type: Map
+
+            - graphql_type: jsonb
+              dart_type: Map
+
+            - graphql_type: bigint
+              dart_type: int
+
+            - graphql_type: citext
+              dart_type: String

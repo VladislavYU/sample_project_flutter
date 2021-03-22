@@ -1,0 +1,9 @@
+fragment User on users {
+  __typename
+  id
+  created_at
+  updated_at
+  display_name
+  avatar_url
+  phone_number
+}

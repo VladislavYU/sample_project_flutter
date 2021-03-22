@@ -1,0 +1,1 @@
+enum BuildMode { prod, dev }
