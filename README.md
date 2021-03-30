@@ -15,6 +15,9 @@ For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+Для запуска проекта вам необходимо настроить файл окружения `.env` (пример `.env.example`)
+
+Для корректной работы еще следует создать проект `firebase` и подключить его
 
 Для скачивания схемы graphql нужно использовать download_schema.sh в аргументы принимает токен пользователя.
 
