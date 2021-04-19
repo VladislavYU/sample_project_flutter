@@ -6,12 +6,14 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:sample_project/app/routes/app_pages.dart';
 import 'package:sample_project/controllers/controllers.dart';
 
-enum AuthEnum { SIGNIN, SIGNUP }
-
 class AuthController extends GetxController {
   final email = ''.obs;
   final password = ''.obs;
   final signIn = false.obs;
+  void switchSign() {
+    signIn.value = !signIn.value;
+  }
+
   void reg() async {
     if (password.value.length < 8) {
       return Get.showSnackbar(GetBar(

@@ -72,6 +72,9 @@ class HomeView extends GetView<HomeController> {
                 child: Container(
                   child: Subscription(
                     builder: (result) {
+                      if (result == null) {
+                        return CircularProgressIndicator();
+                      }
                       var r = NewsList$SubscriptionRoot.fromJson(result.data)
                           .news
                           .toList();
