@@ -17,6 +17,7 @@ class AuthController extends GetxController {
   void reg() async {
     if (password.value.length < 8) {
       return Get.showSnackbar(GetBar(
+        duration: Duration(seconds: 3),
         messageText: Text(
           'Пароль должен быть не меньше 8 символов',
           style: TextStyle(color: Colors.white),

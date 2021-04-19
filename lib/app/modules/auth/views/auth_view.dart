@@ -71,7 +71,8 @@ class AuthView extends GetView<AuthController> {
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
                       child: TextField(
-                        decoration: InputDecoration(hintText: "...Email"),
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(hintText: "email"),
                         onChanged: (value) => controller.email.value = value,
                       ),
                     ),
@@ -80,7 +81,7 @@ class AuthView extends GetView<AuthController> {
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
                       child: TextField(
-                        decoration: InputDecoration(hintText: "...*******"),
+                        decoration: InputDecoration(hintText: "password"),
                         obscureText: true,
                         onChanged: (value) => controller.password.value = value,
                       ),
