@@ -14,7 +14,7 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('HomeView'),
+        title: Text(controller.user.value.displayName),
         centerTitle: true,
         actions: [
           IconButton(
@@ -73,8 +73,16 @@ class HomeView extends GetView<HomeController> {
                                           ),
                                         ),
                                         Text(r[i].content.length < 50
-                                            ? r[i].content
-                                            : r[i].content.substring(0, 50) +
+                                            ? r[i]
+                                                .content
+                                                .split('splitterDisplayName')
+                                                .first
+                                            : r[i]
+                                                    .content
+                                                    .split(
+                                                        'splitterDisplayName')
+                                                    .first
+                                                    .substring(0, 50) +
                                                 '...')
                                       ],
                                     ),
@@ -178,6 +186,7 @@ class CardNews extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
                             child: Text(
@@ -191,7 +200,8 @@ class CardNews extends StatelessWidget {
                           Container(
                             height: Get.height / 1.7,
                             child: SingleChildScrollView(
-                              child: Text(content),
+                              child: Text(
+                                  content.split('splitterDisplayName').first),
                             ),
                           ),
                           Divider(),
@@ -201,9 +211,14 @@ class CardNews extends StatelessWidget {
                         children: [
                           Text('Create at: ' + createdAt.split(' ').first),
                           Text(
-                            'Id: ' + id,
-                            style: TextStyle(fontSize: 12),
-                          )
+                            'from: ' +
+                                content.split('splitterDisplayName').last,
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          // Text(
+                          //   'Id: ' + id,
+                          //   style: TextStyle(fontSize: 12),
+                          // )
                         ],
                       )
                     ],
