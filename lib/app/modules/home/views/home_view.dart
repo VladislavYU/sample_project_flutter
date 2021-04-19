@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:logger/logger.dart';
 import 'package:sample_project/controllers/controllers.dart';
 import 'package:sample_project/controllers/user_controller.dart';
 import 'package:sample_project/generated/graphql/api.graphql.dart';
@@ -15,6 +16,12 @@ class HomeView extends GetView<HomeController> {
       appBar: AppBar(
         title: Text('HomeView'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () => ApiController.to.logout(),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.bottomSheet(Container(
@@ -101,19 +108,6 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ),
               ),
-              // Expanded(
-              //   child: Row(
-              //     children: [
-              //       Container(
-              //         child: TextField(),
-              //       ),
-              //       IconButton(
-              //         icon: Icon(Icons.send),
-              //         onPressed: () {},
-              //       )
-              //     ],
-              //   ),
-              // )
             ],
           ),
         ),

@@ -24,7 +24,6 @@ class HomeController extends GetxController {
     content.value = '';
   }
 
-  var news = NewsList$SubscriptionRoot().news;
   final newsSubs = NewsListSubscription(
     variables: NewsListArguments(
       orderBy: [

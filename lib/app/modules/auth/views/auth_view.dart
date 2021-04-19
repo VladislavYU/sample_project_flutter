@@ -19,8 +19,10 @@ class AuthView extends GetView<AuthController> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                _sign(Colors.blue[100], "SignUp", () => controller.reg()),
-                _sign(Colors.green[100], "SignIn", () => controller.login())
+                _sign(Colors.blue[100], "SignUp", () => controller.reg(),
+                    "Зарегистрироваться"),
+                _sign(Colors.green[100], "SignIn", () => controller.login(),
+                    "Войти в аккаунт")
               ],
             ),
           ),
@@ -29,13 +31,17 @@ class AuthView extends GetView<AuthController> {
     );
   }
 
-  Widget _sign(color, buttontext, myFunc) {
+  Widget _sign(color, buttontext, myFunc, title) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
         color: color,
         child: Column(
           children: [
+            SizedBox(
+              height: 20,
+            ),
+            Text(title),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Container(
@@ -55,7 +61,10 @@ class AuthView extends GetView<AuthController> {
             Container(
               child: TextButton(
                 child: Text(buttontext),
-                onPressed: myFunc,
+                onPressed: () {
+                  myFunc();
+                  FocusManager.instance.primaryFocus.unfocus();
+                },
               ),
             )
           ],
