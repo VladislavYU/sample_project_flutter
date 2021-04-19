@@ -50,7 +50,7 @@ class AuthView extends GetView<AuthController> {
         child: Column(
           children: [
             InkWell(
-                onTap: showSign,
+                onTap: !isSignin ? showSign : () {},
                 child: Column(
                   children: [
                     SizedBox(
@@ -71,6 +71,7 @@ class AuthView extends GetView<AuthController> {
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
                       child: TextField(
+                        decoration: InputDecoration(hintText: "...Email"),
                         onChanged: (value) => controller.email.value = value,
                       ),
                     ),
@@ -79,6 +80,7 @@ class AuthView extends GetView<AuthController> {
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
                       child: TextField(
+                        decoration: InputDecoration(hintText: "...*******"),
                         obscureText: true,
                         onChanged: (value) => controller.password.value = value,
                       ),
