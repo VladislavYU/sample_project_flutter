@@ -72,7 +72,13 @@ class HomeView extends GetView<HomeController> {
                                             style: TextStyle(fontSize: 24),
                                           ),
                                         ),
-                                        Text(r[i].content.length < 50
+                                        Text(r[i]
+                                                    .content
+                                                    .split(
+                                                        'splitterDisplayName')
+                                                    .first
+                                                    .length <
+                                                50
                                             ? r[i]
                                                 .content
                                                 .split('splitterDisplayName')
