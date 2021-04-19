@@ -18,7 +18,6 @@ Future<void> initAppModule(BuildMode buildMode) async {
   await GetStorage.init();
   Get.put(ThemeController());
 
-
   await Get.put(StoreController()).init();
 
   final graphqlEndpoint = env['GRAPHQL_ENDPOINT'];

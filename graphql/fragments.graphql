@@ -7,3 +7,12 @@ fragment User on users {
   avatar_url
   phone_number
 }
+
+fragment News on news{
+  __typename
+  id
+  created_at
+  updated_at
+  title
+  content  
+}

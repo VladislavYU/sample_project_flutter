@@ -1,0 +1,7 @@
+subscription News(
+  $orderBy: [news_order_by!] = { created_at: desc }
+) {
+ news: news(order_by: $orderBy) {
+    ...News
+  }
+}

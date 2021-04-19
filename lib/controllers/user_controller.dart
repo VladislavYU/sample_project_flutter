@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:sample_project/app/routes/app_pages.dart';
 import 'package:sample_project/generated/graphql/api.graphql.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
@@ -57,10 +58,10 @@ class UserController extends DisposableInterface {
 
       if (authorized) {
         await loadUser();
-        // await Get.offAllNamed(Routes.ROOT);
+        await Get.offAllNamed(Routes.HOME);
       } else {
         unsubscribe();
-        // await Get.offAllNamed(Routes.AUTHORIZATION);
+        await Get.offAllNamed(Routes.AUTH);
         user.value = null;
       }
     });

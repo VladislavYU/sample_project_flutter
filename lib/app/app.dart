@@ -1,7 +1,9 @@
+import 'package:sample_project/app/resources/app_theme.dart';
 import 'package:sample_project/controllers/api_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:sample_project/controllers/user_controller.dart';
 
 import 'routes/app_pages.dart';
 
@@ -13,7 +15,8 @@ class App extends StatelessWidget {
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
         title: "Application",
-        initialRoute: Routes.HOME,
+        theme: AppTheme.lightTheme,
+        initialRoute: UserController.isAuth ? Routes.HOME : Routes.AUTH,
         getPages: AppPages.routes,
         locale: Get.deviceLocale,
       ),

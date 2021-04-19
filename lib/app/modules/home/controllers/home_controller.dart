@@ -1,9 +1,38 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:sample_project/controllers/api_controller.dart';
+import 'package:sample_project/generated/graphql/api.graphql.dart';
+import 'package:sample_project/extensions.dart';
 
 class HomeController extends GetxController {
-  //TODO: Implement HomeController
+  var title = ''.obs;
+  var content = ''.obs;
 
-  final count = 0.obs;
+  Future<QueryResult> sendNews() {
+    return ApiController.mutate(CreateNewsMutation(
+      variables: CreateNewsArguments(
+        content: content.value,
+        title: title.value,
+      ),
+    ).options());
+  }
+
+  void clearFields() {
+    title.value = '';
+    content.value = '';
+  }
+
+  var news = NewsList$SubscriptionRoot().news;
+  final newsSubs = NewsListSubscription(
+    variables: NewsListArguments(
+      orderBy: [
+        NewsOrderBy(createdAt: OrderBy.desc),
+      ],
+    ),
+  );
+
   @override
   void onInit() {
     super.onInit();
@@ -16,5 +45,4 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {}
-  void increment() => count.value++;
 }
