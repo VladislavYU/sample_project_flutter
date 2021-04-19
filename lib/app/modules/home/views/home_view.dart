@@ -174,19 +174,26 @@ class CardNews extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Column(
                         children: [
-                          Text(
-                            title,
-                            style: TextStyle(fontSize: 24),
+                          Container(
+                            child: Text(
+                              title,
+                              style: TextStyle(fontSize: 24),
+                            ),
                           ),
                           SizedBox(
                             height: 20,
                           ),
-                          Text(content),
+                          Container(
+                            height: Get.height / 1.7,
+                            child: SingleChildScrollView(
+                              child: Text(content),
+                            ),
+                          ),
                           Divider(),
                         ],
                       ),
