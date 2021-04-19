@@ -24,43 +24,7 @@ class HomeView extends GetView<HomeController> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.bottomSheet(Container(
-          color: Colors.white,
-          height: Get.height / 2,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  TextField(
-                    onChanged: (v) => controller.title.value = v,
-                    decoration: InputDecoration(hintText: 'Заголовок'),
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  TextFormField(
-                    onChanged: (v) => controller.content.value = v,
-                    decoration: InputDecoration(
-                        hintText: 'Ваша новость', border: OutlineInputBorder()),
-                    maxLines: 6,
-                  ),
-                  Container(
-                    alignment: Alignment.bottomRight,
-                    child: TextButton.icon(
-                      label: Text("Отправить"),
-                      icon: Icon(Icons.send),
-                      onPressed: () {
-                        controller.sendNews();
-                        Get.back();
-                      },
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ),
-        )),
+        onPressed: () => Get.bottomSheet(NewsSheet()),
         child: Icon(Icons.edit),
       ),
       body: Center(
@@ -97,7 +61,23 @@ class HomeView extends GetView<HomeController> {
                                 child: Card(
                                   child: Padding(
                                     padding: const EdgeInsets.all(12.0),
-                                    child: Text(r[i].title.toString()),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            r[i].title.toString(),
+                                            style: TextStyle(fontSize: 24),
+                                          ),
+                                        ),
+                                        Text(r[i].content.length < 50
+                                            ? r[i].content
+                                            : r[i].content.substring(0, 50) +
+                                                '...')
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -119,8 +99,56 @@ class HomeView extends GetView<HomeController> {
   }
 }
 
+class NewsSheet extends StatelessWidget {
+  NewsSheet({
+    Key key,
+  }) : super(key: key);
+  final HomeController c = Get.find();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      height: Get.height / 2,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(
+                onChanged: (v) => c.title.value = v,
+                decoration: InputDecoration(hintText: 'Заголовок'),
+              ),
+              SizedBox(
+                height: 30,
+              ),
+              TextFormField(
+                onChanged: (v) => c.content.value = v,
+                decoration: InputDecoration(
+                    hintText: 'Ваша новость', border: OutlineInputBorder()),
+                maxLines: 6,
+              ),
+              Container(
+                alignment: Alignment.bottomRight,
+                child: TextButton.icon(
+                  label: Text("Отправить"),
+                  icon: Icon(Icons.send),
+                  onPressed: () {
+                    c.sendNews();
+                    Get.back();
+                  },
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class CardNews extends StatelessWidget {
-  CardNews({
+  const CardNews({
     this.content,
     this.createdAt,
     this.id,
@@ -128,10 +156,10 @@ class CardNews extends StatelessWidget {
     Key key,
   }) : super(key: key);
 
-  String title;
-  String content;
-  String createdAt;
-  String id;
+  final String title;
+  final String content;
+  final String createdAt;
+  final String id;
   @override
   Widget build(BuildContext context) {
     return Stack(

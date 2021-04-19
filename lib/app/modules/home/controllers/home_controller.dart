@@ -9,7 +9,6 @@ import 'package:sample_project/extensions.dart';
 class HomeController extends GetxController {
   var title = ''.obs;
   var content = ''.obs;
-
   Future<QueryResult> sendNews() {
     return ApiController.mutate(CreateNewsMutation(
       variables: CreateNewsArguments(
