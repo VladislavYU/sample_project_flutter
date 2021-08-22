@@ -2,48 +2,30 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+
 import 'package:sample_project/controllers/api_controller.dart';
 import 'package:sample_project/controllers/user_controller.dart';
-import 'package:sample_project/generated/graphql/api.graphql.dart';
 import 'package:sample_project/extensions.dart';
+import 'package:sample_project/generated/graphql/api.graphql.dart';
 
 class HomeController extends GetxController {
-  Rx<UserMixin> get user => UserController.to.user;
-  var title = ''.obs;
-  var content = ''.obs;
-  Future<QueryResult> sendNews() {
-    return ApiController.mutate(CreateNewsMutation(
-      variables: CreateNewsArguments(
-          content: content.value +
-              'splitterDisplayName' +
-              user.value.displayName.toString(),
-          title: title.value),
-    ).options());
-  }
+  final UserController _userController;
+  Rx<UserMixin> get user => _userController.user;
 
-  void clearFields() {
-    title.value = '';
-    content.value = '';
-  }
-
-  final newsSubs = NewsListSubscription(
-    variables: NewsListArguments(
-      orderBy: [
-        NewsOrderBy(createdAt: OrderBy.desc),
-      ],
-    ),
+  HomeController(
+    this._userController,
   );
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
+    while (true) {
+      await Future.delayed(Duration(minutes: 1), () async {
+        final mutation = UpdateUserMutation(
+            variables: UpdateUserArguments(
+                id: user.value.id, display_name: DateTime.now().toString()));
+        await ApiController.client.mutate(mutation.options());
+      });
+    }
   }
-
-  @override
-  void onReady() {
-    super.onReady();
-  }
-
-  @override
-  void onClose() {}
 }

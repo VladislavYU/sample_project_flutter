@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io' hide WebSocket;
+import 'dart:io';
 import 'dart:math' show max;
 
-import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart' hide Response;
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,7 +14,9 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 // import 'package:path/path.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-import 'package:websocket/websocket.dart' show WebSocket;
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+// import 'package:websocket/websocket.dart' show WebSocket;
 
 // import '../models/uploaded_file.dart';
 import 'controllers.dart';
@@ -36,8 +36,18 @@ class ApiController extends DisposableInterface {
   final String apiBaseUrl;
   final String storageBaseUrl;
 
-  static String getFileUrl(String path) =>
-      <String>[to.storageBaseUrl, path].join('/');
+  final _recconectController = StreamController<String>.broadcast();
+  Stream get reconnectedStream => _recconectController.stream;
+
+  WebSocketLink socketLink;
+
+  bool isRefreshing = false;
+
+  static String getFileUrl(String path) {
+    if (path == null) return '';
+    if (path.toLowerCase().contains('http')) return path;
+    return <String>[to.storageBaseUrl, (path ?? '')].join('/');
+  }
 
   GraphQLClient _client;
   static GraphQLClient get client => to._client;
@@ -65,6 +75,8 @@ class ApiController extends DisposableInterface {
   static const _authLoginRoute = '/auth/login';
   static const _authLogoutRoute = '/auth/logout';
   static const _authFirebaseRoute = '/auth/firebase';
+  static const _sendCode = '/auth/sms/send-code';
+  static const _authLoginWithSms = '/auth/sms/login';
 
   @override
   void onInit() {
@@ -78,24 +90,23 @@ class ApiController extends DisposableInterface {
           compact: true,
           maxWidth: 90))
       ..interceptors.add(InterceptorsWrapper(
-        onRequest: (RequestOptions options) async {
-          if (accessToken != null) {
+        onRequest: (options, handler) async {
+          if (accessToken != null && accessToken != '') {
             if (JwtDecoder.isExpired(accessToken) &&
                 options.path != _authTokenRefreshRoute) await refreshToken();
 
             options.headers['Authorization'] = 'Bearer $accessToken';
           }
-          return options;
+          return handler.next(options);
         },
-        onError: (err) {
+        onError: (err, errorHandler) {
           if (err.error is SocketException) {
             log('connection error', name: 'ApiController', error: err.error);
           } else if (err.response != null) {
             switch (err.response.statusCode) {
               case 401:
                 if (token != null) {
-                  debugger();
-                  FirebaseCrashlytics.instance.recordError(err, null);
+                  logout();
                 }
                 break;
 
@@ -103,6 +114,7 @@ class ApiController extends DisposableInterface {
                 break;
             }
           }
+          errorHandler.next(err);
         },
       ));
 
@@ -133,30 +145,28 @@ class ApiController extends DisposableInterface {
       },
     );
 
-    WebSocket _socket;
     void sendHeaders() {
-      final payload = json.encode({
-        'type': 'connection_init',
-        'payload': {'headers': _createHeaders()},
-      });
-      _socket?.add(payload);
-      log('socket send new headers:\n$payload', name: 'ApiController');
+      try {
+        final payload = json.encode({
+          'type': 'connection_init',
+          'payload': {'headers': _createHeaders()},
+        });
+        log('socket send new headers:\n$payload', name: 'ApiController');
+      } catch (e) {}
     }
 
-    final socketLink = WebSocketLink(
+    socketLink = WebSocketLink(
       graphqlWsEndpoint,
       config: SocketClientConfig(
-        autoReconnect: true,
-        initialPayload: () => {'headers': _createHeaders()},
-        onConnectOrReconnect: (socket) {
-          log('socket connented', name: 'ApiController');
-          _socket = socket;
-          Future.delayed(
-            const Duration(seconds: 1),
-            () => UserController.to.subscribe(),
-          );
-        },
-      ),
+          autoReconnect: true,
+          initialPayload: () => {'headers': _createHeaders()},
+          // connect: (url, protocols) {
+          //   UserController.to.subscribe();
+          //   _recconectController.add('update');
+          //   return IOWebSocketChannel.connect(url,
+          //       protocols: protocols, headers: _createHeaders());
+          // }
+          ),
     )..connectOrReconnect();
 
     final dioLink = DioLink(graphqlEndpoint, client: _dio);
@@ -187,8 +197,8 @@ class ApiController extends DisposableInterface {
       if (current != null) {
         final expiresIn = max(900000, current.expiresIn ?? 0);
         Future.delayed(Duration(milliseconds: expiresIn - 120000))
-            .then((value) {
-          if (token.value != null) refreshToken();
+            .then((value) async {
+          if (token.value != null) await refreshToken();
         });
       }
     });
@@ -202,6 +212,8 @@ class ApiController extends DisposableInterface {
     assert(token.value != null);
 
     try {
+      if (isRefreshing) return;
+      isRefreshing = true;
       final result = await _dio.get(_authTokenRefreshRoute, queryParameters: {
         'refresh_token': token.value.refreshToken,
       });
@@ -212,8 +224,11 @@ class ApiController extends DisposableInterface {
       );
 
       log('token refreshed', name: 'ApiController');
+      socketLink.connectOrReconnect();
+      isRefreshing = false;
     } catch (error) {
       log(_authTokenRefreshRoute, name: 'ApiController', error: error);
+      isRefreshing = false;
     }
   }
 
@@ -241,53 +256,56 @@ class ApiController extends DisposableInterface {
   Future<void> logout() async {
     final isAuth = token.value != null;
     token.value = null;
-    if (FirebaseAuth.instance.currentUser != null) {
-      await FirebaseAuth.instance.signOut();
-    }
-    if (isAuth) await _dio.post(_authLogoutRoute);
+    // if (FirebaseAuth.instance.currentUser != null) {
+    //   await FirebaseAuth.instance.signOut();
+    // }
+    if (isAuth)
+      await _dio.post(_authLogoutRoute,
+          queryParameters: {'refresh_token': token.value.refreshToken});
   }
 
-  Future<void> loginByFirebase() async {
-    if (FirebaseAuth.instance.currentUser == null) return;
+  // Future<void> loginByFirebase() async {
+  //   if (FirebaseAuth.instance.currentUser == null) return;
 
-    final idToken = await FirebaseAuth.instance.currentUser.getIdToken();
-    final result = await Dio(BaseOptions(
-      baseUrl: apiBaseUrl,
-      headers: {
-        'Authorization': 'Bearer $idToken',
-      },
-    )).post(_authFirebaseRoute, data: {
-      'cookie': false,
+  //   final idToken = await FirebaseAuth.instance.currentUser.getIdToken();
+  //   final result = await Dio(BaseOptions(
+  //     baseUrl: apiBaseUrl,
+  //     headers: {
+  //       'Authorization': 'Bearer $idToken',
+  //     },
+  //   )).post(_authFirebaseRoute, data: {
+  //     'cookie': false,
+  //   });
+
+  //   token.value = AuthToken(
+  //     accessToken: result.data['jwt_token'],
+  //     expiresIn: result.data['jwt_expires_in'],
+  //     refreshToken: result.data['refresh_token'],
+  //   );
+  // }
+
+  Future<void> sendCode(String phone) async {
+    final result = await _dio.post(_sendCode, data: {
+      'phone_number': phone,
     });
+  }
 
+  Future<void> loginWithSms(String code, String phone) async {
+    final result = await _dio.post(
+      _authLoginWithSms,
+      data: {
+        'otp': code,
+        'phone_number': phone,
+      },
+    );
     token.value = AuthToken(
       accessToken: result.data['jwt_token'],
       expiresIn: result.data['jwt_expires_in'],
       refreshToken: result.data['refresh_token'],
     );
+
+    await UserController.to.loadUser();
   }
-
-  // Future<UploadedFile> uploadFile(
-  //   String fileFromPath, {
-  //   String fileName,
-  //   Map<String, dynamic> data = const <String, dynamic>{},
-  //   Function(int, int) onSendProgress,
-  //   Function(int, int) onReceiveProgress,
-  // }) async {
-  //   final file = await MultipartFile.fromFile(fileFromPath);
-  //   data['file'] = file;
-  //   fileName ??= basename(fileFromPath);
-  //   final formData = FormData.fromMap(data);
-  //   final result = await _dio.post(
-  //     '/storage/o/users/$userId/$fileName',
-  //     data: formData,
-  //     onSendProgress: onSendProgress,
-  //     onReceiveProgress: onReceiveProgress,
-  //   );
-  //   return UploadedFile.fromJson(result.data);
-  // }
-
-  // Future<void> deleteFile(String path) => _dio.delete('/storage/o/$path');
 
   Map<String, String> _createHeaders() => accessToken != null
       ? <String, String>{'Authorization': 'Bearer $accessToken'}

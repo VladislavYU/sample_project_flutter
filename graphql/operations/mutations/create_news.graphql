@@ -1,5 +1,5 @@
-mutation CreateNews($content:String!,$title:String!){
-   news:insert_news(objects:{content:$content,title:$title}){
-       affected_rows
-    }
+mutation CreateNews($content: String!, $title: String!) {
+  news: insert_news(objects: { content: $content, title: $title }) {
+    affected_rows
+  }
 }

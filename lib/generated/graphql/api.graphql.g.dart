@@ -1,4 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// @dart=2.12
 
 part of 'api.graphql.dart';
 
@@ -6,14 +7,29 @@ part of 'api.graphql.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-CreateNews$MutationRoot$News _$CreateNews$MutationRoot$NewsFromJson(
-    Map<String, dynamic> json) {
-  return CreateNews$MutationRoot$News()
-    ..affectedRows = json['affected_rows'] as int;
+UpdateUser$MutationRoot$UpdateUsersByPk
+    _$UpdateUser$MutationRoot$UpdateUsersByPkFromJson(
+        Map<String, dynamic> json) {
+  return UpdateUser$MutationRoot$UpdateUsersByPk()..id = json['id'] as String;
 }
 
-Map<String, dynamic> _$CreateNews$MutationRoot$NewsToJson(
-    CreateNews$MutationRoot$News instance) {
+Map<String, dynamic> _$UpdateUser$MutationRoot$UpdateUsersByPkToJson(
+        UpdateUser$MutationRoot$UpdateUsersByPk instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+    };
+
+UpdateUser$MutationRoot _$UpdateUser$MutationRootFromJson(
+    Map<String, dynamic> json) {
+  return UpdateUser$MutationRoot()
+    ..updateUsersByPk = json['update_users_by_pk'] == null
+        ? null
+        : UpdateUser$MutationRoot$UpdateUsersByPk.fromJson(
+            json['update_users_by_pk'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$UpdateUser$MutationRootToJson(
+    UpdateUser$MutationRoot instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
@@ -22,9 +38,21 @@ Map<String, dynamic> _$CreateNews$MutationRoot$NewsToJson(
     }
   }
 
-  writeNotNull('affected_rows', instance.affectedRows);
+  writeNotNull('update_users_by_pk', instance.updateUsersByPk?.toJson());
   return val;
 }
+
+CreateNews$MutationRoot$News _$CreateNews$MutationRoot$NewsFromJson(
+    Map<String, dynamic> json) {
+  return CreateNews$MutationRoot$News()
+    ..affectedRows = json['affected_rows'] as int;
+}
+
+Map<String, dynamic> _$CreateNews$MutationRoot$NewsToJson(
+        CreateNews$MutationRoot$News instance) =>
+    <String, dynamic>{
+      'affected_rows': instance.affectedRows,
+    };
 
 CreateNews$MutationRoot _$CreateNews$MutationRootFromJson(
     Map<String, dynamic> json) {
@@ -52,17 +80,13 @@ Map<String, dynamic> _$CreateNews$MutationRootToJson(
 GetCurrentUser$QueryRoot$User _$GetCurrentUser$QueryRoot$UserFromJson(
     Map<String, dynamic> json) {
   return GetCurrentUser$QueryRoot$User()
-    ..$$typename = json['__typename'] as String
+    ..$$typename = json['__typename'] as String?
     ..id = json['id'] as String
-    ..createdAt = json['created_at'] == null
-        ? null
-        : DateTime.parse(json['created_at'] as String)
-    ..updatedAt = json['updated_at'] == null
-        ? null
-        : DateTime.parse(json['updated_at'] as String)
-    ..displayName = json['display_name'] as String
-    ..avatarUrl = json['avatar_url'] as String
-    ..phoneNumber = json['phone_number'] as String;
+    ..createdAt = DateTime.parse(json['created_at'] as String)
+    ..updatedAt = DateTime.parse(json['updated_at'] as String)
+    ..displayName = json['display_name'] as String?
+    ..avatarUrl = json['avatar_url'] as String?
+    ..phoneNumber = json['phone_number'] as String?;
 }
 
 Map<String, dynamic> _$GetCurrentUser$QueryRoot$UserToJson(
@@ -76,9 +100,9 @@ Map<String, dynamic> _$GetCurrentUser$QueryRoot$UserToJson(
   }
 
   writeNotNull('__typename', instance.$$typename);
-  writeNotNull('id', instance.id);
-  writeNotNull('created_at', instance.createdAt?.toIso8601String());
-  writeNotNull('updated_at', instance.updatedAt?.toIso8601String());
+  val['id'] = instance.id;
+  val['created_at'] = instance.createdAt.toIso8601String();
+  val['updated_at'] = instance.updatedAt.toIso8601String();
   writeNotNull('display_name', instance.displayName);
   writeNotNull('avatar_url', instance.avatarUrl);
   writeNotNull('phone_number', instance.phoneNumber);
@@ -108,82 +132,19 @@ Map<String, dynamic> _$GetCurrentUser$QueryRootToJson(
   return val;
 }
 
-CurrentUser$SubscriptionRoot$User _$CurrentUser$SubscriptionRoot$UserFromJson(
+News$SubscriptionRoot$News _$News$SubscriptionRoot$NewsFromJson(
     Map<String, dynamic> json) {
-  return CurrentUser$SubscriptionRoot$User()
-    ..$$typename = json['__typename'] as String
+  return News$SubscriptionRoot$News()
+    ..$$typename = json['__typename'] as String?
     ..id = json['id'] as String
-    ..createdAt = json['created_at'] == null
-        ? null
-        : DateTime.parse(json['created_at'] as String)
-    ..updatedAt = json['updated_at'] == null
-        ? null
-        : DateTime.parse(json['updated_at'] as String)
-    ..displayName = json['display_name'] as String
-    ..avatarUrl = json['avatar_url'] as String
-    ..phoneNumber = json['phone_number'] as String;
-}
-
-Map<String, dynamic> _$CurrentUser$SubscriptionRoot$UserToJson(
-    CurrentUser$SubscriptionRoot$User instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('__typename', instance.$$typename);
-  writeNotNull('id', instance.id);
-  writeNotNull('created_at', instance.createdAt?.toIso8601String());
-  writeNotNull('updated_at', instance.updatedAt?.toIso8601String());
-  writeNotNull('display_name', instance.displayName);
-  writeNotNull('avatar_url', instance.avatarUrl);
-  writeNotNull('phone_number', instance.phoneNumber);
-  return val;
-}
-
-CurrentUser$SubscriptionRoot _$CurrentUser$SubscriptionRootFromJson(
-    Map<String, dynamic> json) {
-  return CurrentUser$SubscriptionRoot()
-    ..user = json['user'] == null
-        ? null
-        : CurrentUser$SubscriptionRoot$User.fromJson(
-            json['user'] as Map<String, dynamic>);
-}
-
-Map<String, dynamic> _$CurrentUser$SubscriptionRootToJson(
-    CurrentUser$SubscriptionRoot instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('user', instance.user?.toJson());
-  return val;
-}
-
-NewsList$SubscriptionRoot$News _$NewsList$SubscriptionRoot$NewsFromJson(
-    Map<String, dynamic> json) {
-  return NewsList$SubscriptionRoot$News()
-    ..$$typename = json['__typename'] as String
-    ..id = json['id'] as String
-    ..createdAt = json['created_at'] == null
-        ? null
-        : DateTime.parse(json['created_at'] as String)
-    ..updatedAt = json['updated_at'] == null
-        ? null
-        : DateTime.parse(json['updated_at'] as String)
+    ..createdAt = DateTime.parse(json['created_at'] as String)
+    ..updatedAt = DateTime.parse(json['updated_at'] as String)
     ..title = json['title'] as String
     ..content = json['content'] as String;
 }
 
-Map<String, dynamic> _$NewsList$SubscriptionRoot$NewsToJson(
-    NewsList$SubscriptionRoot$News instance) {
+Map<String, dynamic> _$News$SubscriptionRoot$NewsToJson(
+    News$SubscriptionRoot$News instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
@@ -193,38 +154,28 @@ Map<String, dynamic> _$NewsList$SubscriptionRoot$NewsToJson(
   }
 
   writeNotNull('__typename', instance.$$typename);
-  writeNotNull('id', instance.id);
-  writeNotNull('created_at', instance.createdAt?.toIso8601String());
-  writeNotNull('updated_at', instance.updatedAt?.toIso8601String());
-  writeNotNull('title', instance.title);
-  writeNotNull('content', instance.content);
+  val['id'] = instance.id;
+  val['created_at'] = instance.createdAt.toIso8601String();
+  val['updated_at'] = instance.updatedAt.toIso8601String();
+  val['title'] = instance.title;
+  val['content'] = instance.content;
   return val;
 }
 
-NewsList$SubscriptionRoot _$NewsList$SubscriptionRootFromJson(
+News$SubscriptionRoot _$News$SubscriptionRootFromJson(
     Map<String, dynamic> json) {
-  return NewsList$SubscriptionRoot()
-    ..news = (json['news'] as List)
-        ?.map((e) => e == null
-            ? null
-            : NewsList$SubscriptionRoot$News.fromJson(
-                e as Map<String, dynamic>))
-        ?.toList();
+  return News$SubscriptionRoot()
+    ..news = (json['news'] as List<dynamic>)
+        .map((e) =>
+            News$SubscriptionRoot$News.fromJson(e as Map<String, dynamic>))
+        .toList();
 }
 
-Map<String, dynamic> _$NewsList$SubscriptionRootToJson(
-    NewsList$SubscriptionRoot instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('news', instance.news?.map((e) => e?.toJson())?.toList());
-  return val;
-}
+Map<String, dynamic> _$News$SubscriptionRootToJson(
+        News$SubscriptionRoot instance) =>
+    <String, dynamic>{
+      'news': instance.news.map((e) => e.toJson()).toList(),
+    };
 
 NewsOrderBy _$NewsOrderByFromJson(Map<String, dynamic> json) {
   return NewsOrderBy(
@@ -258,36 +209,41 @@ Map<String, dynamic> _$NewsOrderByToJson(NewsOrderBy instance) {
   return val;
 }
 
-T _$enumDecode<T>(
-  Map<T, dynamic> enumValues,
-  dynamic source, {
-  T unknownValue,
+K _$enumDecode<K, V>(
+  Map<K, V> enumValues,
+  Object? source, {
+  K? unknownValue,
 }) {
   if (source == null) {
-    throw ArgumentError('A value must be provided. Supported values: '
-        '${enumValues.values.join(', ')}');
+    throw ArgumentError(
+      'A value must be provided. Supported values: '
+      '${enumValues.values.join(', ')}',
+    );
   }
 
-  final value = enumValues.entries
-      .singleWhere((e) => e.value == source, orElse: () => null)
-      ?.key;
-
-  if (value == null && unknownValue == null) {
-    throw ArgumentError('`$source` is not one of the supported values: '
-        '${enumValues.values.join(', ')}');
-  }
-  return value ?? unknownValue;
+  return enumValues.entries.singleWhere(
+    (e) => e.value == source,
+    orElse: () {
+      if (unknownValue == null) {
+        throw ArgumentError(
+          '`$source` is not one of the supported values: '
+          '${enumValues.values.join(', ')}',
+        );
+      }
+      return MapEntry(unknownValue, enumValues.values.first);
+    },
+  ).key;
 }
 
-T _$enumDecodeNullable<T>(
-  Map<T, dynamic> enumValues,
+K? _$enumDecodeNullable<K, V>(
+  Map<K, V> enumValues,
   dynamic source, {
-  T unknownValue,
+  K? unknownValue,
 }) {
   if (source == null) {
     return null;
   }
-  return _$enumDecode<T>(enumValues, source, unknownValue: unknownValue);
+  return _$enumDecode<K, V>(enumValues, source, unknownValue: unknownValue);
 }
 
 const _$OrderByEnumMap = {
@@ -300,14 +256,20 @@ const _$OrderByEnumMap = {
   OrderBy.artemisUnknown: 'ARTEMIS_UNKNOWN',
 };
 
-CreateNewsArguments _$CreateNewsArgumentsFromJson(Map<String, dynamic> json) {
-  return CreateNewsArguments(
-    content: json['content'] as String,
-    title: json['title'] as String,
-  );
+CurrentUser$SubscriptionRoot$User _$CurrentUser$SubscriptionRoot$UserFromJson(
+    Map<String, dynamic> json) {
+  return CurrentUser$SubscriptionRoot$User()
+    ..$$typename = json['__typename'] as String?
+    ..id = json['id'] as String
+    ..createdAt = DateTime.parse(json['created_at'] as String)
+    ..updatedAt = DateTime.parse(json['updated_at'] as String)
+    ..displayName = json['display_name'] as String?
+    ..avatarUrl = json['avatar_url'] as String?
+    ..phoneNumber = json['phone_number'] as String?;
 }
 
-Map<String, dynamic> _$CreateNewsArgumentsToJson(CreateNewsArguments instance) {
+Map<String, dynamic> _$CurrentUser$SubscriptionRoot$UserToJson(
+    CurrentUser$SubscriptionRoot$User instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
@@ -316,10 +278,74 @@ Map<String, dynamic> _$CreateNewsArgumentsToJson(CreateNewsArguments instance) {
     }
   }
 
-  writeNotNull('content', instance.content);
-  writeNotNull('title', instance.title);
+  writeNotNull('__typename', instance.$$typename);
+  val['id'] = instance.id;
+  val['created_at'] = instance.createdAt.toIso8601String();
+  val['updated_at'] = instance.updatedAt.toIso8601String();
+  writeNotNull('display_name', instance.displayName);
+  writeNotNull('avatar_url', instance.avatarUrl);
+  writeNotNull('phone_number', instance.phoneNumber);
   return val;
 }
+
+CurrentUser$SubscriptionRoot _$CurrentUser$SubscriptionRootFromJson(
+    Map<String, dynamic> json) {
+  return CurrentUser$SubscriptionRoot()
+    ..user = json['user'] == null
+        ? null
+        : CurrentUser$SubscriptionRoot$User.fromJson(
+            json['user'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$CurrentUser$SubscriptionRootToJson(
+    CurrentUser$SubscriptionRoot instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('user', instance.user?.toJson());
+  return val;
+}
+
+UpdateUserArguments _$UpdateUserArgumentsFromJson(Map<String, dynamic> json) {
+  return UpdateUserArguments(
+    id: json['id'] as String,
+    display_name: json['display_name'] as String?,
+  );
+}
+
+Map<String, dynamic> _$UpdateUserArgumentsToJson(UpdateUserArguments instance) {
+  final val = <String, dynamic>{
+    'id': instance.id,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('display_name', instance.display_name);
+  return val;
+}
+
+CreateNewsArguments _$CreateNewsArgumentsFromJson(Map<String, dynamic> json) {
+  return CreateNewsArguments(
+    content: json['content'] as String,
+    title: json['title'] as String,
+  );
+}
+
+Map<String, dynamic> _$CreateNewsArgumentsToJson(
+        CreateNewsArguments instance) =>
+    <String, dynamic>{
+      'content': instance.content,
+      'title': instance.title,
+    };
 
 GetCurrentUserArguments _$GetCurrentUserArgumentsFromJson(
     Map<String, dynamic> json) {
@@ -329,7 +355,20 @@ GetCurrentUserArguments _$GetCurrentUserArgumentsFromJson(
 }
 
 Map<String, dynamic> _$GetCurrentUserArgumentsToJson(
-    GetCurrentUserArguments instance) {
+        GetCurrentUserArguments instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+    };
+
+NewsArguments _$NewsArgumentsFromJson(Map<String, dynamic> json) {
+  return NewsArguments(
+    orderBy: (json['orderBy'] as List<dynamic>?)
+        ?.map((e) => NewsOrderBy.fromJson(e as Map<String, dynamic>))
+        .toList(),
+  );
+}
+
+Map<String, dynamic> _$NewsArgumentsToJson(NewsArguments instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
@@ -338,7 +377,7 @@ Map<String, dynamic> _$GetCurrentUserArgumentsToJson(
     }
   }
 
-  writeNotNull('userId', instance.userId);
+  writeNotNull('orderBy', instance.orderBy?.map((e) => e.toJson()).toList());
   return val;
 }
 
@@ -349,37 +388,7 @@ CurrentUserArguments _$CurrentUserArgumentsFromJson(Map<String, dynamic> json) {
 }
 
 Map<String, dynamic> _$CurrentUserArgumentsToJson(
-    CurrentUserArguments instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('userId', instance.userId);
-  return val;
-}
-
-NewsListArguments _$NewsListArgumentsFromJson(Map<String, dynamic> json) {
-  return NewsListArguments(
-    orderBy: (json['orderBy'] as List)
-        ?.map((e) =>
-            e == null ? null : NewsOrderBy.fromJson(e as Map<String, dynamic>))
-        ?.toList(),
-  );
-}
-
-Map<String, dynamic> _$NewsListArgumentsToJson(NewsListArguments instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('orderBy', instance.orderBy?.map((e) => e?.toJson())?.toList());
-  return val;
-}
+        CurrentUserArguments instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+    };

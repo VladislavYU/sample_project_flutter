@@ -4,16 +4,14 @@ import 'package:sample_project/controllers/controllers.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:intl/date_symbol_data_local.dart';
 
 BuildMode kBuildMode;
 
 Future<void> initAppModule(BuildMode buildMode) async {
   kBuildMode = buildMode;
 
-  await initializeDateFormatting();
-  await DotEnv().load();
-  final env = DotEnv().env;
+  await dotenv.load(fileName: ".env");
+  final env = dotenv.env;
 
   await GetStorage.init();
   Get.put(ThemeController());

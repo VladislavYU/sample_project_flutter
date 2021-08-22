@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:sample_project/app/routes/app_pages.dart';
 import 'package:sample_project/generated/graphql/api.graphql.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:sample_project/extensions.dart';
@@ -23,10 +23,10 @@ class UserController extends DisposableInterface {
   bool _susbcribed = false;
   StreamSubscription<QueryResult> _currentUserSubscription;
 
-  Stream<bool> firebaseIsAuth() =>
-      FirebaseAuth.instance.authStateChanges().map((event) => event != null);
+  // Stream<bool> firebaseIsAuth() =>
+  //     FirebaseAuth.instance.authStateChanges().map((event) => event != null);
 
-  Stream<User> firebaseUserChanges() => FirebaseAuth.instance.userChanges();
+  // Stream<User> firebaseUserChanges() => FirebaseAuth.instance.userChanges();
 
   Future<void> loadUser(
       {FetchPolicy fetchPolicy = FetchPolicy.networkOnly}) async {
@@ -70,13 +70,14 @@ class UserController extends DisposableInterface {
   }
 
   Future<void> init() async {
-    firebaseIsAuth().listen((event) {
-      if (event) {
-        ApiController.to.loginByFirebase();
-      } else {
-        ApiController.to.logout();
-      }
-    });
+    // firebaseIsAuth().listen((event) {
+    //   if (event) {
+    //     ApiController.to.loginByFirebase();
+    //   } else {
+    //     ApiController.to.logout();
+    //   }
+    // }
+    // );
 
     if (StoreController.to.token != null) {
       try {
@@ -110,7 +111,8 @@ class UserController extends DisposableInterface {
         log('CurrentUserSubscription',
             error: event.exception, name: 'UserController');
       } else {
-        final result = GetCurrentUserQuery().parse(event.data);
+        final result = currentUserSubscription.parse(event.data);
+        log('user updated', name: 'UserController');
         if (result.user != null) {
           user.value = result.user;
         } else {

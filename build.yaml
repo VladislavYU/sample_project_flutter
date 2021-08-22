@@ -10,7 +10,6 @@ targets:
       json_serializable:
         options:
           include_if_null: false
-          nullable: true
 
       artemis:
         options:

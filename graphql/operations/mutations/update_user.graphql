@@ -1,0 +1,8 @@
+mutation UpdateUser($id: uuid!, $display_name: String) {
+  update_users_by_pk(
+    pk_columns: { id: $id }
+    _set: { display_name: $display_name }
+  ) {
+    id
+  }
+}
