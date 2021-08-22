@@ -14,14 +14,14 @@ import 'controllers.dart';
 class UserController extends DisposableInterface {
   static UserController get to => Get.find();
 
-  final user = Rx<UserMixin>(null);
+  final user = Rxn<UserMixin>(null);
   final newMessagesCount = RxInt(0);
 
   static bool get isAuth => to.user.value != null;
-  static String get userId => to.user.value?.id;
+  static String? get userId => to.user.value?.id;
 
   bool _susbcribed = false;
-  StreamSubscription<QueryResult> _currentUserSubscription;
+  late StreamSubscription<QueryResult> _currentUserSubscription;
 
   // Stream<bool> firebaseIsAuth() =>
   //     FirebaseAuth.instance.authStateChanges().map((event) => event != null);
@@ -31,15 +31,15 @@ class UserController extends DisposableInterface {
   Future<void> loadUser(
       {FetchPolicy fetchPolicy = FetchPolicy.networkOnly}) async {
     final query = GetCurrentUserQuery(
-      variables: GetCurrentUserArguments(userId: ApiController.to.userId),
+      variables: GetCurrentUserArguments(userId: ApiController.to.userId ?? ''),
     );
-    final result =
-        await ApiController.query(query.options(fetchPolicy: fetchPolicy));
+    final result = await ApiController.query(
+        query.options(fetchPolicy: fetchPolicy) as QueryOptions);
     if (result.hasException) {
       log('loadUser', error: result.exception, name: 'UserController');
-      throw result.exception;
+      throw result.exception!;
     } else {
-      final data = query.parse(result.data);
+      final data = query.parse(result.data!);
       if (data.user != null) {
         user.value = data.user;
       } else {
@@ -102,16 +102,16 @@ class UserController extends DisposableInterface {
     if (_susbcribed || StoreController.to.token == null) return;
     //  current user
     final currentUserSubscription = CurrentUserSubscription(
-      variables: CurrentUserArguments(userId: ApiController.to.userId),
+      variables: CurrentUserArguments(userId: ApiController.to.userId ?? ''),
     );
     _currentUserSubscription = ApiController.subscribe(
-      currentUserSubscription.options(),
+      currentUserSubscription.options() as SubscriptionOptions,
     ).listen((event) {
       if (event.hasException) {
         log('CurrentUserSubscription',
             error: event.exception, name: 'UserController');
       } else {
-        final result = currentUserSubscription.parse(event.data);
+        final result = currentUserSubscription.parse(event.data!);
         log('user updated', name: 'UserController');
         if (result.user != null) {
           user.value = result.user;
@@ -126,7 +126,7 @@ class UserController extends DisposableInterface {
   }
 
   void unsubscribe() {
-    _currentUserSubscription?.cancel();
+    if (_currentUserSubscription != null) _currentUserSubscription.cancel();
     _susbcribed = false;
     log('unsubscribed', name: 'UserController');
   }

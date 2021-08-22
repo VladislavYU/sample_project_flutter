@@ -92,7 +92,7 @@ class AuthView extends GetView<AuthController> {
                       child: Text(buttontext),
                       onPressed: () {
                         myFunc();
-                        FocusManager.instance.primaryFocus.unfocus();
+                        FocusManager.instance.primaryFocus?.unfocus();
                       },
                     ),
                   )

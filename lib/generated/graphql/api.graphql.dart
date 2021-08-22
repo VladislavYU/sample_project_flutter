@@ -69,38 +69,6 @@ class UpdateUser$MutationRoot extends JsonSerializable with EquatableMixin {
 }
 
 @JsonSerializable(explicitToJson: true)
-class CreateNews$MutationRoot$News extends JsonSerializable
-    with EquatableMixin {
-  CreateNews$MutationRoot$News();
-
-  factory CreateNews$MutationRoot$News.fromJson(Map<String, dynamic> json) =>
-      _$CreateNews$MutationRoot$NewsFromJson(json);
-
-  @JsonKey(name: 'affected_rows')
-  late int affectedRows;
-
-  @override
-  List<Object?> get props => [affectedRows];
-  @override
-  Map<String, dynamic> toJson() => _$CreateNews$MutationRoot$NewsToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
-class CreateNews$MutationRoot extends JsonSerializable with EquatableMixin {
-  CreateNews$MutationRoot();
-
-  factory CreateNews$MutationRoot.fromJson(Map<String, dynamic> json) =>
-      _$CreateNews$MutationRootFromJson(json);
-
-  CreateNews$MutationRoot$News? news;
-
-  @override
-  List<Object?> get props => [news];
-  @override
-  Map<String, dynamic> toJson() => _$CreateNews$MutationRootToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
 class GetCurrentUser$QueryRoot$User extends JsonSerializable
     with EquatableMixin, UserMixin {
   GetCurrentUser$QueryRoot$User();
@@ -340,91 +308,6 @@ class UpdateUserMutation
   @override
   UpdateUser$MutationRoot parse(Map<String, dynamic> json) =>
       UpdateUser$MutationRoot.fromJson(json);
-}
-
-@JsonSerializable(explicitToJson: true)
-class CreateNewsArguments extends JsonSerializable with EquatableMixin {
-  CreateNewsArguments({required this.content, required this.title});
-
-  @override
-  factory CreateNewsArguments.fromJson(Map<String, dynamic> json) =>
-      _$CreateNewsArgumentsFromJson(json);
-
-  late String content;
-
-  late String title;
-
-  @override
-  List<Object?> get props => [content, title];
-  @override
-  Map<String, dynamic> toJson() => _$CreateNewsArgumentsToJson(this);
-}
-
-final CREATE_NEWS_MUTATION_DOCUMENT = DocumentNode(definitions: [
-  OperationDefinitionNode(
-      type: OperationType.mutation,
-      name: NameNode(value: 'CreateNews'),
-      variableDefinitions: [
-        VariableDefinitionNode(
-            variable: VariableNode(name: NameNode(value: 'content')),
-            type:
-                NamedTypeNode(name: NameNode(value: 'String'), isNonNull: true),
-            defaultValue: DefaultValueNode(value: null),
-            directives: []),
-        VariableDefinitionNode(
-            variable: VariableNode(name: NameNode(value: 'title')),
-            type:
-                NamedTypeNode(name: NameNode(value: 'String'), isNonNull: true),
-            defaultValue: DefaultValueNode(value: null),
-            directives: [])
-      ],
-      directives: [],
-      selectionSet: SelectionSetNode(selections: [
-        FieldNode(
-            name: NameNode(value: 'insert_news'),
-            alias: NameNode(value: 'news'),
-            arguments: [
-              ArgumentNode(
-                  name: NameNode(value: 'objects'),
-                  value: ObjectValueNode(fields: [
-                    ObjectFieldNode(
-                        name: NameNode(value: 'content'),
-                        value: VariableNode(name: NameNode(value: 'content'))),
-                    ObjectFieldNode(
-                        name: NameNode(value: 'title'),
-                        value: VariableNode(name: NameNode(value: 'title')))
-                  ]))
-            ],
-            directives: [],
-            selectionSet: SelectionSetNode(selections: [
-              FieldNode(
-                  name: NameNode(value: 'affected_rows'),
-                  alias: null,
-                  arguments: [],
-                  directives: [],
-                  selectionSet: null)
-            ]))
-      ]))
-]);
-
-class CreateNewsMutation
-    extends GraphQLQuery<CreateNews$MutationRoot, CreateNewsArguments> {
-  CreateNewsMutation({required this.variables});
-
-  @override
-  final DocumentNode document = CREATE_NEWS_MUTATION_DOCUMENT;
-
-  @override
-  final String operationName = 'CreateNews';
-
-  @override
-  final CreateNewsArguments variables;
-
-  @override
-  List<Object?> get props => [document, operationName, variables];
-  @override
-  CreateNews$MutationRoot parse(Map<String, dynamic> json) =>
-      CreateNews$MutationRoot.fromJson(json);
 }
 
 @JsonSerializable(explicitToJson: true)

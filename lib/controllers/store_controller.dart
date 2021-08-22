@@ -17,8 +17,8 @@ class StoreController extends DisposableInterface {
   final _secureStorage = FlutterSecureStorage();
   final apiStore = _GetStore();
 
-  AuthToken _token;
-  AuthToken get token => _token;
+  AuthToken? _token;
+  AuthToken? get token => _token;
 
   Future<void> init() async {
     try {
@@ -52,7 +52,7 @@ class StoreController extends DisposableInterface {
     }
   }
 
-  Future<void> saveToken(AuthToken token) async {
+  Future<void> saveToken(AuthToken? token) async {
     _token = token;
     try {
       if (token == null) {
@@ -76,7 +76,7 @@ class _GetStore extends Store {
   Map<String, dynamic> get(String dataId) => box.read(dataId);
 
   @override
-  void put(String dataId, Map<String, dynamic> value) =>
+  void put(String dataId, Map<String, dynamic>? value) =>
       box.write(dataId, value);
 
   @override

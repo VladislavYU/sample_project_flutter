@@ -42,41 +42,6 @@ Map<String, dynamic> _$UpdateUser$MutationRootToJson(
   return val;
 }
 
-CreateNews$MutationRoot$News _$CreateNews$MutationRoot$NewsFromJson(
-    Map<String, dynamic> json) {
-  return CreateNews$MutationRoot$News()
-    ..affectedRows = json['affected_rows'] as int;
-}
-
-Map<String, dynamic> _$CreateNews$MutationRoot$NewsToJson(
-        CreateNews$MutationRoot$News instance) =>
-    <String, dynamic>{
-      'affected_rows': instance.affectedRows,
-    };
-
-CreateNews$MutationRoot _$CreateNews$MutationRootFromJson(
-    Map<String, dynamic> json) {
-  return CreateNews$MutationRoot()
-    ..news = json['news'] == null
-        ? null
-        : CreateNews$MutationRoot$News.fromJson(
-            json['news'] as Map<String, dynamic>);
-}
-
-Map<String, dynamic> _$CreateNews$MutationRootToJson(
-    CreateNews$MutationRoot instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('news', instance.news?.toJson());
-  return val;
-}
-
 GetCurrentUser$QueryRoot$User _$GetCurrentUser$QueryRoot$UserFromJson(
     Map<String, dynamic> json) {
   return GetCurrentUser$QueryRoot$User()
@@ -332,20 +297,6 @@ Map<String, dynamic> _$UpdateUserArgumentsToJson(UpdateUserArguments instance) {
   writeNotNull('display_name', instance.display_name);
   return val;
 }
-
-CreateNewsArguments _$CreateNewsArgumentsFromJson(Map<String, dynamic> json) {
-  return CreateNewsArguments(
-    content: json['content'] as String,
-    title: json['title'] as String,
-  );
-}
-
-Map<String, dynamic> _$CreateNewsArgumentsToJson(
-        CreateNewsArguments instance) =>
-    <String, dynamic>{
-      'content': instance.content,
-      'title': instance.title,
-    };
 
 GetCurrentUserArguments _$GetCurrentUserArgumentsFromJson(
     Map<String, dynamic> json) {

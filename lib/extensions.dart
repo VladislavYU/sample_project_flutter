@@ -5,11 +5,11 @@ import 'package:graphql/src/core/_base_options.dart' as gql_options;
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 extension GraphQLQueryExtension on GraphQLQuery {
-  gql_options.BaseOptions options({FetchPolicy fetchPolicy}) {
+  gql_options.BaseOptions options({FetchPolicy? fetchPolicy}) {
     final definitions =
         document.definitions.whereType<OperationDefinitionNode>().toList();
     if (operationName != null) {
-      definitions.removeWhere((node) => node.name.value != operationName);
+      definitions.removeWhere((node) => node.name?.value != operationName);
     }
 
     final type = definitions.first.type;

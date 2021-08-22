@@ -29,12 +29,12 @@ class AuthController extends GetxController {
       await ApiController.to.register(email.value, password.value);
       await ApiController.to.login(email.value, password.value);
     } on DioError catch (e) {
-      if (e.response.data is Map) {
+      if (e.response?.data is Map) {
         Get.showSnackbar(
           GetBar(
             duration: Duration(seconds: 3),
             messageText: Text(
-              e.response.data['message'].toString(),
+              e.response?.data['message'].toString() ?? '',
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -47,12 +47,12 @@ class AuthController extends GetxController {
     try {
       await ApiController.to.login(email.value, password.value);
     } on DioError catch (e) {
-      if (e.response.data is Map) {
+      if (e.response?.data is Map) {
         Get.showSnackbar(
           GetBar(
             duration: Duration(seconds: 3),
             messageText: Text(
-              e.response.data['message'].toString(),
+              e.response?.data['message'].toString() ?? '',
               style: TextStyle(color: Colors.white),
             ),
           ),

@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
-BuildMode kBuildMode;
+late BuildMode kBuildMode;
 
 Future<void> initAppModule(BuildMode buildMode) async {
   kBuildMode = buildMode;
@@ -22,11 +22,11 @@ Future<void> initAppModule(BuildMode buildMode) async {
   final graphqlWsEndpoint = env['GRAPHQL_WS_ENDPOINT'];
   final apiBaseUrl = env['API_BASE_URL'];
   final storageBaseUrl = env['STORAGE_BASE_URL'];
-  Get.put(ApiController(
+  await Get.put(ApiController(
     graphqlEndpoint: graphqlEndpoint,
     graphqlWsEndpoint: graphqlWsEndpoint,
     apiBaseUrl: apiBaseUrl,
     storageBaseUrl: storageBaseUrl,
-  ));
+  )).init();
   await Get.put(UserController()).init();
 }

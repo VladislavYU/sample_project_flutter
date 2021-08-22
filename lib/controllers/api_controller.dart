@@ -5,14 +5,12 @@ import 'dart:io';
 import 'dart:math' show max;
 
 import 'package:dio/dio.dart' hide Response;
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gql_dio_link/gql_dio_link.dart' hide HttpLinkHeaders;
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-// import 'package:path/path.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -31,25 +29,25 @@ class ApiController extends DisposableInterface {
 
   static ApiController get to => Get.find<ApiController>();
 
-  final String graphqlEndpoint;
-  final String graphqlWsEndpoint;
-  final String apiBaseUrl;
-  final String storageBaseUrl;
+  late final String? graphqlEndpoint;
+  late final String? graphqlWsEndpoint;
+  late final String? apiBaseUrl;
+  late final String? storageBaseUrl;
 
   final _recconectController = StreamController<String>.broadcast();
   Stream get reconnectedStream => _recconectController.stream;
 
-  WebSocketLink socketLink;
+  late WebSocketLink socketLink;
 
   bool isRefreshing = false;
 
-  static String getFileUrl(String path) {
+  static String getFileUrl(String? path) {
     if (path == null) return '';
     if (path.toLowerCase().contains('http')) return path;
-    return <String>[to.storageBaseUrl, (path ?? '')].join('/');
+    return <String>[to.storageBaseUrl ?? '', (path)].join('/');
   }
 
-  GraphQLClient _client;
+  late GraphQLClient _client;
   static GraphQLClient get client => to._client;
 
   static Future<QueryResult> Function(MutationOptions) get mutate =>
@@ -58,15 +56,15 @@ class ApiController extends DisposableInterface {
   static Stream<QueryResult> Function(SubscriptionOptions) get subscribe =>
       client.subscribe;
 
-  Dio _dio;
+  late Dio _dio;
   static Dio get dio => to._dio;
 
-  final token = Rx<AuthToken>(StoreController.to.token);
-  String get accessToken => token.value?.accessToken;
+  final token = Rxn<AuthToken>(StoreController.to.token);
+  String? get accessToken => token.value?.accessToken;
 
-  String get userId {
+  String? get userId {
     if (accessToken == null) return null;
-    final result = JwtDecoder.decode(accessToken);
+    final result = JwtDecoder.decode(accessToken!);
     return result['https://hasura.io/jwt/claims']['x-hasura-user-id'];
   }
 
@@ -78,9 +76,8 @@ class ApiController extends DisposableInterface {
   static const _sendCode = '/auth/sms/send-code';
   static const _authLoginWithSms = '/auth/sms/login';
 
-  @override
-  void onInit() {
-    _dio = Dio(BaseOptions(baseUrl: apiBaseUrl))
+  Future<void> init() async {
+    _dio = Dio(BaseOptions(baseUrl: apiBaseUrl ?? ''))
       ..interceptors.add(PrettyDioLogger(
           requestHeader: true,
           requestBody: true,
@@ -92,7 +89,7 @@ class ApiController extends DisposableInterface {
       ..interceptors.add(InterceptorsWrapper(
         onRequest: (options, handler) async {
           if (accessToken != null && accessToken != '') {
-            if (JwtDecoder.isExpired(accessToken) &&
+            if (JwtDecoder.isExpired(accessToken!) &&
                 options.path != _authTokenRefreshRoute) await refreshToken();
 
             options.headers['Authorization'] = 'Bearer $accessToken';
@@ -103,7 +100,7 @@ class ApiController extends DisposableInterface {
           if (err.error is SocketException) {
             log('connection error', name: 'ApiController', error: err.error);
           } else if (err.response != null) {
-            switch (err.response.statusCode) {
+            switch (err.response?.statusCode) {
               case 401:
                 if (token != null) {
                   logout();
@@ -130,7 +127,7 @@ class ApiController extends DisposableInterface {
       onGraphQLError: (request, forward, response) async* {
         if (response.errors != null) {
           log('graphql server error',
-              name: 'ApiController', error: response.errors[0]);
+              name: 'ApiController', error: response.errors![0]);
         }
 
         yield* forward(request);
@@ -156,20 +153,32 @@ class ApiController extends DisposableInterface {
     }
 
     socketLink = WebSocketLink(
-      graphqlWsEndpoint,
+      graphqlWsEndpoint ?? '',
       config: SocketClientConfig(
           autoReconnect: true,
           initialPayload: () => {'headers': _createHeaders()},
-          // connect: (url, protocols) {
-          //   UserController.to.subscribe();
-          //   _recconectController.add('update');
-          //   return IOWebSocketChannel.connect(url,
-          //       protocols: protocols, headers: _createHeaders());
-          // }
-          ),
+          connect: (url, protocols) {
+            final socket = IOWebSocketChannel.connect(url,
+                protocols: protocols, headers: _createHeaders());
+
+            // ..stream.asBroadcastStream().listen((event) {
+            // var e = json.decode(event);
+
+            // switch (e['type']) {
+            //   case 'connection_ack':
+            //     UserController.to.subscribe();
+            //     break;
+            //   default:
+            //     print('Unimplemented event received $event');
+            // }
+            // });
+
+            UserController.to.subscribe();
+            return socket;
+          }),
     )..connectOrReconnect();
 
-    final dioLink = DioLink(graphqlEndpoint, client: _dio);
+    final dioLink = DioLink(graphqlEndpoint ?? '', client: _dio);
 
     final link = Link.from([
       // DedupeLink(),
@@ -183,9 +192,9 @@ class ApiController extends DisposableInterface {
       ),
     );
 
-    String lastToken;
-    ever(token, (value) {
-      AuthToken current = value;
+    String? lastToken;
+    ever(token, (AuthToken? value) {
+      AuthToken? current = value;
 
       // send new token to socket
       if (lastToken != current?.accessToken) sendHeaders();
@@ -203,10 +212,12 @@ class ApiController extends DisposableInterface {
       }
     });
 
-    if (token.value != null) refreshToken();
+    if (token.value != null) await refreshToken();
 
-    super.onInit();
+    return;
   }
+
+  void subscribeSocket() {}
 
   Future<void> refreshToken() async {
     assert(token.value != null);
@@ -215,7 +226,7 @@ class ApiController extends DisposableInterface {
       if (isRefreshing) return;
       isRefreshing = true;
       final result = await _dio.get(_authTokenRefreshRoute, queryParameters: {
-        'refresh_token': token.value.refreshToken,
+        'refresh_token': token.value?.refreshToken,
       });
       token.value = AuthToken(
         accessToken: result.data['jwt_token'],
@@ -261,7 +272,7 @@ class ApiController extends DisposableInterface {
     // }
     if (isAuth)
       await _dio.post(_authLogoutRoute,
-          queryParameters: {'refresh_token': token.value.refreshToken});
+          queryParameters: {'refresh_token': token.value?.refreshToken});
   }
 
   // Future<void> loginByFirebase() async {
@@ -314,20 +325,20 @@ class ApiController extends DisposableInterface {
 
 class AuthToken {
   /// The access token string as issued by the authorization server.
-  final String accessToken;
+  final String? accessToken;
 
   /// The type of token this is, typically just the string “bearer”.
-  final String tokenType;
+  final String? tokenType;
 
   /// If the access token expires, the server should reply
   /// with the duration of time the access token is granted for.
-  final int expiresIn;
+  final int? expiresIn;
 
   /// Token which applications can use to obtain another access token.
-  final String refreshToken;
+  final String? refreshToken;
 
   /// Application scope granted as defined in https://oauth.net/2/scope
-  final String scope;
+  final String? scope;
 
   const AuthToken({
     @required this.accessToken,
