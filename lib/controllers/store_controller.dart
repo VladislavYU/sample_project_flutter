@@ -73,7 +73,7 @@ class _GetStore extends Store {
   final box = GetStorage(_cacheKey);
 
   @override
-  Map<String, dynamic> get(String dataId) => box.read(dataId);
+  Map<String, dynamic>? get(String dataId) => box.read(dataId);
 
   @override
   void put(String dataId, Map<String, dynamic>? value) =>

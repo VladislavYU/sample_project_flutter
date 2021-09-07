@@ -9,7 +9,7 @@ targets:
     builders:
       json_serializable:
         options:
-          include_if_null: false
+          include_if_null: true
 
       artemis:
         options:

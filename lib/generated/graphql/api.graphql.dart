@@ -11,16 +11,8 @@ mixin UserMixin {
   @JsonKey(name: '__typename')
   String? $$typename;
   late String id;
-  @JsonKey(name: 'created_at')
-  late DateTime createdAt;
-  @JsonKey(name: 'updated_at')
-  late DateTime updatedAt;
   @JsonKey(name: 'display_name')
   String? displayName;
-  @JsonKey(name: 'avatar_url')
-  String? avatarUrl;
-  @JsonKey(name: 'phone_number')
-  String? phoneNumber;
 }
 mixin NewsMixin {
   @JsonKey(name: '__typename')
@@ -77,15 +69,7 @@ class GetCurrentUser$QueryRoot$User extends JsonSerializable
       _$GetCurrentUser$QueryRoot$UserFromJson(json);
 
   @override
-  List<Object?> get props => [
-        $$typename,
-        id,
-        createdAt,
-        updatedAt,
-        displayName,
-        avatarUrl,
-        phoneNumber
-      ];
+  List<Object?> get props => [$$typename, id, displayName];
   @override
   Map<String, dynamic> toJson() => _$GetCurrentUser$QueryRoot$UserToJson(this);
 }
@@ -138,10 +122,18 @@ class News$SubscriptionRoot extends JsonSerializable with EquatableMixin {
 @JsonSerializable(explicitToJson: true)
 class NewsOrderBy extends JsonSerializable with EquatableMixin {
   NewsOrderBy(
-      {this.content, this.createdAt, this.id, this.title, this.updatedAt});
+      {this.author,
+      this.content,
+      this.createdAt,
+      this.id,
+      this.title,
+      this.updatedAt,
+      this.userId});
 
   factory NewsOrderBy.fromJson(Map<String, dynamic> json) =>
       _$NewsOrderByFromJson(json);
+
+  UsersOrderBy? author;
 
   @JsonKey(unknownEnumValue: OrderBy.artemisUnknown)
   OrderBy? content;
@@ -158,10 +150,179 @@ class NewsOrderBy extends JsonSerializable with EquatableMixin {
   @JsonKey(name: 'updated_at', unknownEnumValue: OrderBy.artemisUnknown)
   OrderBy? updatedAt;
 
+  @JsonKey(name: 'user_id', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? userId;
+
   @override
-  List<Object?> get props => [content, createdAt, id, title, updatedAt];
+  List<Object?> get props =>
+      [author, content, createdAt, id, title, updatedAt, userId];
   @override
   Map<String, dynamic> toJson() => _$NewsOrderByToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class UsersOrderBy extends JsonSerializable with EquatableMixin {
+  UsersOrderBy(
+      {this.account,
+      this.avatarUrl,
+      this.createdAt,
+      this.displayName,
+      this.id,
+      this.phoneNumber,
+      this.updatedAt});
+
+  factory UsersOrderBy.fromJson(Map<String, dynamic> json) =>
+      _$UsersOrderByFromJson(json);
+
+  AuthAccountsOrderBy? account;
+
+  @JsonKey(name: 'avatar_url', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? avatarUrl;
+
+  @JsonKey(name: 'created_at', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? createdAt;
+
+  @JsonKey(name: 'display_name', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? displayName;
+
+  @JsonKey(unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? id;
+
+  @JsonKey(name: 'phone_number', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? phoneNumber;
+
+  @JsonKey(name: 'updated_at', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? updatedAt;
+
+  @override
+  List<Object?> get props =>
+      [account, avatarUrl, createdAt, displayName, id, phoneNumber, updatedAt];
+  @override
+  Map<String, dynamic> toJson() => _$UsersOrderByToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class AuthAccountsOrderBy extends JsonSerializable with EquatableMixin {
+  AuthAccountsOrderBy(
+      {this.active,
+      this.createdAt,
+      this.customRegisterData,
+      this.defaultRole,
+      this.email,
+      this.firebaseUid,
+      this.id,
+      this.isAnonymous,
+      this.mfaEnabled,
+      this.newEmail,
+      this.otpSecret,
+      this.passwordHash,
+      this.phoneNumber,
+      this.role,
+      this.ticket,
+      this.ticketExpiresAt,
+      this.updatedAt,
+      this.user,
+      this.userId});
+
+  factory AuthAccountsOrderBy.fromJson(Map<String, dynamic> json) =>
+      _$AuthAccountsOrderByFromJson(json);
+
+  @JsonKey(unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? active;
+
+  @JsonKey(name: 'created_at', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? createdAt;
+
+  @JsonKey(
+      name: 'custom_register_data', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? customRegisterData;
+
+  @JsonKey(name: 'default_role', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? defaultRole;
+
+  @JsonKey(unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? email;
+
+  @JsonKey(name: 'firebase_uid', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? firebaseUid;
+
+  @JsonKey(unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? id;
+
+  @JsonKey(name: 'is_anonymous', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? isAnonymous;
+
+  @JsonKey(name: 'mfa_enabled', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? mfaEnabled;
+
+  @JsonKey(name: 'new_email', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? newEmail;
+
+  @JsonKey(name: 'otp_secret', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? otpSecret;
+
+  @JsonKey(name: 'password_hash', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? passwordHash;
+
+  @JsonKey(name: 'phone_number', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? phoneNumber;
+
+  AuthRolesOrderBy? role;
+
+  @JsonKey(unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? ticket;
+
+  @JsonKey(name: 'ticket_expires_at', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? ticketExpiresAt;
+
+  @JsonKey(name: 'updated_at', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? updatedAt;
+
+  UsersOrderBy? user;
+
+  @JsonKey(name: 'user_id', unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? userId;
+
+  @override
+  List<Object?> get props => [
+        active,
+        createdAt,
+        customRegisterData,
+        defaultRole,
+        email,
+        firebaseUid,
+        id,
+        isAnonymous,
+        mfaEnabled,
+        newEmail,
+        otpSecret,
+        passwordHash,
+        phoneNumber,
+        role,
+        ticket,
+        ticketExpiresAt,
+        updatedAt,
+        user,
+        userId
+      ];
+  @override
+  Map<String, dynamic> toJson() => _$AuthAccountsOrderByToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class AuthRolesOrderBy extends JsonSerializable with EquatableMixin {
+  AuthRolesOrderBy({this.role});
+
+  factory AuthRolesOrderBy.fromJson(Map<String, dynamic> json) =>
+      _$AuthRolesOrderByFromJson(json);
+
+  @JsonKey(unknownEnumValue: OrderBy.artemisUnknown)
+  OrderBy? role;
+
+  @override
+  List<Object?> get props => [role];
+  @override
+  Map<String, dynamic> toJson() => _$AuthRolesOrderByToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -174,15 +335,7 @@ class CurrentUser$SubscriptionRoot$User extends JsonSerializable
       _$CurrentUser$SubscriptionRoot$UserFromJson(json);
 
   @override
-  List<Object?> get props => [
-        $$typename,
-        id,
-        createdAt,
-        updatedAt,
-        displayName,
-        avatarUrl,
-        phoneNumber
-      ];
+  List<Object?> get props => [$$typename, id, displayName];
   @override
   Map<String, dynamic> toJson() =>
       _$CurrentUser$SubscriptionRoot$UserToJson(this);
@@ -371,31 +524,7 @@ final GET_CURRENT_USER_QUERY_DOCUMENT = DocumentNode(definitions: [
             directives: [],
             selectionSet: null),
         FieldNode(
-            name: NameNode(value: 'created_at'),
-            alias: null,
-            arguments: [],
-            directives: [],
-            selectionSet: null),
-        FieldNode(
-            name: NameNode(value: 'updated_at'),
-            alias: null,
-            arguments: [],
-            directives: [],
-            selectionSet: null),
-        FieldNode(
             name: NameNode(value: 'display_name'),
-            alias: null,
-            arguments: [],
-            directives: [],
-            selectionSet: null),
-        FieldNode(
-            name: NameNode(value: 'avatar_url'),
-            alias: null,
-            arguments: [],
-            directives: [],
-            selectionSet: null),
-        FieldNode(
-            name: NameNode(value: 'phone_number'),
             alias: null,
             arguments: [],
             directives: [],
@@ -599,31 +728,7 @@ final CURRENT_USER_SUBSCRIPTION_DOCUMENT = DocumentNode(definitions: [
             directives: [],
             selectionSet: null),
         FieldNode(
-            name: NameNode(value: 'created_at'),
-            alias: null,
-            arguments: [],
-            directives: [],
-            selectionSet: null),
-        FieldNode(
-            name: NameNode(value: 'updated_at'),
-            alias: null,
-            arguments: [],
-            directives: [],
-            selectionSet: null),
-        FieldNode(
             name: NameNode(value: 'display_name'),
-            alias: null,
-            arguments: [],
-            directives: [],
-            selectionSet: null),
-        FieldNode(
-            name: NameNode(value: 'avatar_url'),
-            alias: null,
-            arguments: [],
-            directives: [],
-            selectionSet: null),
-        FieldNode(
-            name: NameNode(value: 'phone_number'),
             alias: null,
             arguments: [],
             directives: [],

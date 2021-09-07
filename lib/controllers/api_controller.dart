@@ -37,6 +37,8 @@ class ApiController extends DisposableInterface {
   final _recconectController = StreamController<String>.broadcast();
   Stream get reconnectedStream => _recconectController.stream;
 
+  WebSocketChannel? socket;
+
   late WebSocketLink socketLink;
 
   bool isRefreshing = false;
@@ -102,7 +104,7 @@ class ApiController extends DisposableInterface {
           } else if (err.response != null) {
             switch (err.response?.statusCode) {
               case 401:
-                if (token != null) {
+                if (token.value != null) {
                   logout();
                 }
                 break;
@@ -114,14 +116,6 @@ class ApiController extends DisposableInterface {
           errorHandler.next(err);
         },
       ));
-
-    // (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
-    //     (client) {
-    //   client.badCertificateCallback =
-    //       (X509Certificate cert, String host, int port) {
-    //     return true;
-    //   };
-    // };
 
     final errorLink = ErrorLink(
       onGraphQLError: (request, forward, response) async* {
@@ -142,15 +136,16 @@ class ApiController extends DisposableInterface {
       },
     );
 
-    void sendHeaders() {
-      try {
-        final payload = json.encode({
-          'type': 'connection_init',
-          'payload': {'headers': _createHeaders()},
-        });
-        log('socket send new headers:\n$payload', name: 'ApiController');
-      } catch (e) {}
-    }
+    // void sendHeaders() {
+    //   try {
+    //     final payload = json.encode({
+    //       'type': 'connection_init',
+    //       'payload': {'headers': _createHeaders()},
+    //     });
+    //     log('socket send new headers:\n$payload', name: 'ApiController');
+    //   } catch (e) {
+    //   }
+    // }
 
     socketLink = WebSocketLink(
       graphqlWsEndpoint ?? '',
@@ -158,23 +153,12 @@ class ApiController extends DisposableInterface {
           autoReconnect: true,
           initialPayload: () => {'headers': _createHeaders()},
           connect: (url, protocols) {
-            final socket = IOWebSocketChannel.connect(url,
+            socket = IOWebSocketChannel.connect(url,
                 protocols: protocols, headers: _createHeaders());
 
-            // ..stream.asBroadcastStream().listen((event) {
-            // var e = json.decode(event);
+            subscribeSocket();
 
-            // switch (e['type']) {
-            //   case 'connection_ack':
-            //     UserController.to.subscribe();
-            //     break;
-            //   default:
-            //     print('Unimplemented event received $event');
-            // }
-            // });
-
-            UserController.to.subscribe();
-            return socket;
+            return socket!;
           }),
     )..connectOrReconnect();
 
@@ -197,7 +181,9 @@ class ApiController extends DisposableInterface {
       AuthToken? current = value;
 
       // send new token to socket
-      if (lastToken != current?.accessToken) sendHeaders();
+      if (lastToken != current?.accessToken) {
+        socket?.sink.close();
+      }
       lastToken = current?.accessToken;
 
       // save token
@@ -217,7 +203,19 @@ class ApiController extends DisposableInterface {
     return;
   }
 
-  void subscribeSocket() {}
+  void subscribeSocket() {
+    socket?.stream.asBroadcastStream().listen((event) {
+      var e = json.decode(event);
+
+      switch (e['type']) {
+        case 'connection_ack':
+          UserController.to.subscribe();
+          break;
+        default:
+          print('Unimplemented event received $event');
+      }
+    });
+  }
 
   Future<void> refreshToken() async {
     assert(token.value != null);
@@ -230,7 +228,7 @@ class ApiController extends DisposableInterface {
       });
       token.value = AuthToken(
         accessToken: result.data['jwt_token'],
-        expiresIn: result.data['jwt_expires_in'],
+        expiresIn: 12000,
         refreshToken: result.data['refresh_token'],
       );
 

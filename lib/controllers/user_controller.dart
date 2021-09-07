@@ -58,10 +58,8 @@ class UserController extends DisposableInterface {
 
       if (authorized) {
         await loadUser();
-        await Get.offAllNamed(Routes.HOME);
       } else {
         unsubscribe();
-        await Get.offAllNamed(Routes.AUTH);
         user.value = null;
       }
     });

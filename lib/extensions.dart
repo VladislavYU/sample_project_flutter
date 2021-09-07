@@ -39,4 +39,31 @@ extension GraphQLQueryExtension on GraphQLQuery {
         );
     }
   }
+
+  SubscriptionOptions sOptions({FetchPolicy? fetchPolicy}) {
+    return SubscriptionOptions(
+      document: this.document,
+      operationName: this.operationName,
+      variables: this.getVariablesMap(),
+      fetchPolicy: fetchPolicy,
+    );
+  }
+
+  MutationOptions mOptions({FetchPolicy? fetchPolicy}) {
+    return MutationOptions(
+      document: this.document,
+      operationName: this.operationName,
+      variables: this.getVariablesMap(),
+      fetchPolicy: fetchPolicy,
+    );
+  }
+
+  QueryOptions qOptions({FetchPolicy? fetchPolicy}) {
+    return QueryOptions(
+      document: this.document,
+      operationName: this.operationName,
+      variables: this.getVariablesMap(),
+      fetchPolicy: fetchPolicy,
+    );
+  }
 }
