@@ -14,7 +14,6 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-// import 'package:websocket/websocket.dart' show WebSocket;
 
 // import '../models/uploaded_file.dart';
 import 'controllers.dart';
@@ -127,25 +126,12 @@ class ApiController extends DisposableInterface {
         yield* forward(request);
       },
       onException: (request, forward, exception) async* {
-        if (exception != null) {
-          log('graphql client exception',
-              name: 'ApiController', error: exception);
-        }
+        log('graphql client exception',
+            name: 'ApiController', error: exception);
 
         yield* forward(request);
       },
     );
-
-    // void sendHeaders() {
-    //   try {
-    //     final payload = json.encode({
-    //       'type': 'connection_init',
-    //       'payload': {'headers': _createHeaders()},
-    //     });
-    //     log('socket send new headers:\n$payload', name: 'ApiController');
-    //   } catch (e) {
-    //   }
-    // }
 
     socketLink = WebSocketLink(
       graphqlWsEndpoint ?? '',
@@ -155,6 +141,8 @@ class ApiController extends DisposableInterface {
           connect: (url, protocols) {
             socket = IOWebSocketChannel.connect(url,
                 protocols: protocols, headers: _createHeaders());
+
+            socket = (socket as WebSocketChannel).forGraphQL();
 
             subscribeSocket();
 
@@ -177,6 +165,7 @@ class ApiController extends DisposableInterface {
     );
 
     String? lastToken;
+
     ever(token, (AuthToken? value) {
       AuthToken? current = value;
 
@@ -203,13 +192,14 @@ class ApiController extends DisposableInterface {
     return;
   }
 
-  void subscribeSocket() {
+  void subscribeSocket() async {
     socket?.stream.asBroadcastStream().listen((event) {
       var e = json.decode(event);
-
       switch (e['type']) {
         case 'connection_ack':
+          UserController.to.unsubscribe();
           UserController.to.subscribe();
+          _recconectController.add('event');
           break;
         default:
           print('Unimplemented event received $event');

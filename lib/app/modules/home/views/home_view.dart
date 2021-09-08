@@ -11,20 +11,31 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     controller.onInit();
+    final subQuery = CurrentUserSubscription(
+        variables:
+            CurrentUserArguments(userId: UserController.to.user.value!.id));
     return Scaffold(
-        body: SafeArea(
-      child: Obx(
-        () => Center(
-          child: Column(
-            children: [
-              Text(UserController.to.user.value?.displayName ?? ''),
-              Text(ApiController.to.token.value?.refreshToken ?? ''),
-              Text(ApiController.to.token.value?.accessToken ?? ''),
-            ],
-          ),
+      body: SafeArea(
+        child: StreamBuilder(
+          stream: ApiController.to.reconnectedStream,
+          builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+            return Subscription(
+                options: subQuery.sOptions(),
+                builder: (result) {
+                  return Center(
+                    child: Column(
+                      children: [
+                        Text(UserController.to.user.value?.displayName ?? ''),
+                        Text(ApiController.to.token.value?.refreshToken ?? ''),
+                        Text(ApiController.to.token.value?.accessToken ?? ''),
+                      ],
+                    ),
+                  );
+                });
+          },
         ),
       ),
-    ));
+    );
   }
 
   Widget buildSubscriptionOnUser() {

@@ -20,7 +20,7 @@ class HomeController extends GetxController {
   void onInit() async {
     super.onInit();
     while (true) {
-      await Future.delayed(Duration(minutes: 1), () async {
+      await Future.delayed(Duration(seconds: 30), () async {
         final mutation = UpdateUserMutation(
             variables: UpdateUserArguments(
                 id: user.value?.id ?? '',
