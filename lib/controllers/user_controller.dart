@@ -21,7 +21,7 @@ class UserController extends DisposableInterface {
   static String? get userId => to.user.value?.id;
 
   bool _susbcribed = false;
-  late StreamSubscription<QueryResult> _currentUserSubscription;
+  StreamSubscription<QueryResult>? _currentUserSubscription;
 
   // Stream<bool> firebaseIsAuth() =>
   //     FirebaseAuth.instance.authStateChanges().map((event) => event != null);
@@ -124,7 +124,7 @@ class UserController extends DisposableInterface {
   }
 
   void unsubscribe() {
-    if (_currentUserSubscription != null) _currentUserSubscription.cancel();
+    if (_currentUserSubscription != null) _currentUserSubscription?.cancel();
     _susbcribed = false;
     log('unsubscribed', name: 'UserController');
   }
