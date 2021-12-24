@@ -2,6 +2,7 @@ fragment User on users {
   __typename
   id
   display_name
+  phone_number
 }
 
 fragment News on news{

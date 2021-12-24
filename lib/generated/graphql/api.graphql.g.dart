@@ -39,7 +39,8 @@ GetCurrentUser$QueryRoot$User _$GetCurrentUser$QueryRoot$UserFromJson(
   return GetCurrentUser$QueryRoot$User()
     ..$$typename = json['__typename'] as String?
     ..id = json['id'] as String
-    ..displayName = json['display_name'] as String?;
+    ..displayName = json['display_name'] as String?
+    ..phoneNumber = json['phone_number'] as String?;
 }
 
 Map<String, dynamic> _$GetCurrentUser$QueryRoot$UserToJson(
@@ -48,6 +49,7 @@ Map<String, dynamic> _$GetCurrentUser$QueryRoot$UserToJson(
       '__typename': instance.$$typename,
       'id': instance.id,
       'display_name': instance.displayName,
+      'phone_number': instance.phoneNumber,
     };
 
 GetCurrentUser$QueryRoot _$GetCurrentUser$QueryRootFromJson(
@@ -299,7 +301,8 @@ CurrentUser$SubscriptionRoot$User _$CurrentUser$SubscriptionRoot$UserFromJson(
   return CurrentUser$SubscriptionRoot$User()
     ..$$typename = json['__typename'] as String?
     ..id = json['id'] as String
-    ..displayName = json['display_name'] as String?;
+    ..displayName = json['display_name'] as String?
+    ..phoneNumber = json['phone_number'] as String?;
 }
 
 Map<String, dynamic> _$CurrentUser$SubscriptionRoot$UserToJson(
@@ -308,6 +311,7 @@ Map<String, dynamic> _$CurrentUser$SubscriptionRoot$UserToJson(
       '__typename': instance.$$typename,
       'id': instance.id,
       'display_name': instance.displayName,
+      'phone_number': instance.phoneNumber,
     };
 
 CurrentUser$SubscriptionRoot _$CurrentUser$SubscriptionRootFromJson(

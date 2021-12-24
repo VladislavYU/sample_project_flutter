@@ -13,6 +13,8 @@ mixin UserMixin {
   late String id;
   @JsonKey(name: 'display_name')
   String? displayName;
+  @JsonKey(name: 'phone_number')
+  String? phoneNumber;
 }
 mixin NewsMixin {
   @JsonKey(name: '__typename')
@@ -69,7 +71,7 @@ class GetCurrentUser$QueryRoot$User extends JsonSerializable
       _$GetCurrentUser$QueryRoot$UserFromJson(json);
 
   @override
-  List<Object?> get props => [$$typename, id, displayName];
+  List<Object?> get props => [$$typename, id, displayName, phoneNumber];
   @override
   Map<String, dynamic> toJson() => _$GetCurrentUser$QueryRoot$UserToJson(this);
 }
@@ -335,7 +337,7 @@ class CurrentUser$SubscriptionRoot$User extends JsonSerializable
       _$CurrentUser$SubscriptionRoot$UserFromJson(json);
 
   @override
-  List<Object?> get props => [$$typename, id, displayName];
+  List<Object?> get props => [$$typename, id, displayName, phoneNumber];
   @override
   Map<String, dynamic> toJson() =>
       _$CurrentUser$SubscriptionRoot$UserToJson(this);
@@ -525,6 +527,12 @@ final GET_CURRENT_USER_QUERY_DOCUMENT = DocumentNode(definitions: [
             selectionSet: null),
         FieldNode(
             name: NameNode(value: 'display_name'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null),
+        FieldNode(
+            name: NameNode(value: 'phone_number'),
             alias: null,
             arguments: [],
             directives: [],
@@ -729,6 +737,12 @@ final CURRENT_USER_SUBSCRIPTION_DOCUMENT = DocumentNode(definitions: [
             selectionSet: null),
         FieldNode(
             name: NameNode(value: 'display_name'),
+            alias: null,
+            arguments: [],
+            directives: [],
+            selectionSet: null),
+        FieldNode(
+            name: NameNode(value: 'phone_number'),
             alias: null,
             arguments: [],
             directives: [],

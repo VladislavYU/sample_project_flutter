@@ -202,7 +202,6 @@ class ApiController extends DisposableInterface {
           _recconectController.add('event');
           break;
         default:
-          print('Unimplemented event received $event');
       }
     });
   }

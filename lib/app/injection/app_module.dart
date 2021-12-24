@@ -4,6 +4,9 @@ import 'package:sample_project/controllers/controllers.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:sample_project/data/repository/user_data_repository.dart';
+import 'package:sample_project/data/service/user_service.dart';
+import 'package:sample_project/domain/repository/user_repository.dart';
 
 late BuildMode kBuildMode;
 
@@ -29,4 +32,15 @@ Future<void> initAppModule(BuildMode buildMode) async {
     storageBaseUrl: storageBaseUrl,
   )).init();
   await Get.put(UserController()).init();
+
+  injectServices();
+  injectRepositories();
+}
+
+void injectServices() {
+  Get..put(UserService());
+}
+
+void injectRepositories() {
+  Get..put<UserRepository>(UserDataRepository(Get.find()));
 }
