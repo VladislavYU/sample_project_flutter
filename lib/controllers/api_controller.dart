@@ -4,9 +4,9 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:math' show max;
 
+import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart' hide Response;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gql_dio_link/gql_dio_link.dart' hide HttpLinkHeaders;
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -24,17 +24,19 @@ class ApiController extends DisposableInterface {
     @required this.graphqlWsEndpoint,
     @required this.apiBaseUrl,
     @required this.storageBaseUrl,
+    @required this.organizationId,
   });
 
   static ApiController get to => Get.find<ApiController>();
 
-  late final String? graphqlEndpoint;
-  late final String? graphqlWsEndpoint;
-  late final String? apiBaseUrl;
-  late final String? storageBaseUrl;
+  final String? graphqlEndpoint;
+  final String? graphqlWsEndpoint;
+  final String? apiBaseUrl;
+  final String? storageBaseUrl;
+  final String? organizationId;
 
-  final _recconectController = StreamController<String>.broadcast();
-  Stream get reconnectedStream => _recconectController.stream;
+  final _reconnectController = StreamController<String>.broadcast();
+  Stream get reconnectedStream => _reconnectController.stream;
 
   WebSocketChannel? socket;
 
@@ -48,6 +50,13 @@ class ApiController extends DisposableInterface {
     return <String>[to.storageBaseUrl ?? '', (path)].join('/');
   }
 
+  static String getSmallFileUrl(String? path) {
+    if (path == null) return '';
+    if (path.toLowerCase().contains('http')) return path;
+    return <String>[to.storageBaseUrl ?? '', (path)].join('/') +
+        '?w=600&q=100&f=auto';
+  }
+
   late GraphQLClient _client;
   static GraphQLClient get client => to._client;
 
@@ -56,17 +65,20 @@ class ApiController extends DisposableInterface {
   static Future<QueryResult> Function(QueryOptions) get query => client.query;
   static Stream<QueryResult> Function(SubscriptionOptions) get subscribe =>
       client.subscribe;
+  static ObservableQuery Function(WatchQueryOptions) get watchQuery =>
+      client.watchQuery;
 
   late Dio _dio;
   static Dio get dio => to._dio;
 
   final token = Rxn<AuthToken>(StoreController.to.token);
+  // final anonToken = Rxn<String>(StoreController.to.anonToken);
   String? get accessToken => token.value?.accessToken;
 
   String? get userId {
     if (accessToken == null) return null;
     final result = JwtDecoder.decode(accessToken!);
-    return result['https://hasura.io/jwt/claims']['x-hasura-user-id'];
+    return result['https://hasura.io/jwt/claims']['userId'];
   }
 
   static const _authTokenRefreshRoute = '/auth/token/refresh';
@@ -74,8 +86,12 @@ class ApiController extends DisposableInterface {
   static const _authLoginRoute = '/auth/login';
   static const _authLogoutRoute = '/auth/logout';
   static const _authFirebaseRoute = '/auth/firebase';
-  static const _sendCode = '/auth/sms/send-code';
+  static const _callUser = '/auth/sms/call-user';
   static const _authLoginWithSms = '/auth/sms/login';
+  static const _authLoginWithQrCode = '/auth/erp/qr-code';
+  static const _authCall = '/auth/call';
+  static const _authCallLogin = '/auth/call/login';
+  static const _anonToken = '/auth/login/anonymous';
 
   Future<void> init() async {
     _dio = Dio(BaseOptions(baseUrl: apiBaseUrl ?? ''))
@@ -89,12 +105,30 @@ class ApiController extends DisposableInterface {
           maxWidth: 90))
       ..interceptors.add(InterceptorsWrapper(
         onRequest: (options, handler) async {
-          if (accessToken != null && accessToken != '') {
+          if (kDebugMode) log(accessToken ?? '');
+
+          if (accessToken != null &&
+              accessToken != '' &&
+              !options.path.contains(_authTokenRefreshRoute)) {
             if (JwtDecoder.isExpired(accessToken!) &&
                 options.path != _authTokenRefreshRoute) await refreshToken();
 
             options.headers['Authorization'] = 'Bearer $accessToken';
+            options.headers['x-hasura-role'] = 'BUYER';
+          } else {
+            options.headers['x-hasura-role'] = 'ANONYMOUS';
+
+            // if (anonToken.value != null &&
+            //     anonToken.value != '' &&
+            //     options.path != _authCall &&
+            //     options.path != _authCallLogin &&
+            //     options.path != _authTokenRefreshRoute) {
+            //   options.headers['Authorization'] = 'Bearer ${anonToken.value}';
+            // }
           }
+          options.headers['x-organization-id'] = organizationId;
+          options.headers['x-locale'] = 'ru_RU';
+          log("Subscribe test ${options.headers}");
           return handler.next(options);
         },
         onError: (err, errorHandler) {
@@ -104,10 +138,32 @@ class ApiController extends DisposableInterface {
             switch (err.response?.statusCode) {
               case 401:
                 if (token.value != null) {
-                  logout();
+                  if (err.response?.data != null) {
+                    if (err.response?.data is Map<String, dynamic>) {
+                      final data = err.response?.data as Map<String, dynamic>;
+                      if (data.containsKey('message')) {
+                        if (data['message'].contains('expired refresh token') ||
+                            data['message'].contains('Refresh token expired') ||
+                            data['message']
+                                .contains('Refresh token is not valid')) {
+                          logout();
+                        }
+                      }
+                    } else if (err.response?.data is String) {
+                      if ((err.response?.data as String)
+                              .contains('expired refresh token') ||
+                          (err.response?.data as String)
+                              .contains('Refresh token expired') ||
+                          (err.response?.data as String)
+                              .contains('Refresh token is not valid')) {
+                        logout();
+                      }
+                    }
+                  }
+                } else {
+                  refreshToken();
                 }
                 break;
-
               default:
                 break;
             }
@@ -116,6 +172,12 @@ class ApiController extends DisposableInterface {
         },
       ));
 
+    (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
+        (HttpClient client) {
+      client.badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+      return client;
+    };
     final errorLink = ErrorLink(
       onGraphQLError: (request, forward, response) async* {
         if (response.errors != null) {
@@ -138,9 +200,12 @@ class ApiController extends DisposableInterface {
       config: SocketClientConfig(
           autoReconnect: true,
           initialPayload: () => {'headers': _createHeaders()},
-          connect: (url, protocols) {
-            socket = IOWebSocketChannel.connect(url,
-                protocols: protocols, headers: _createHeaders());
+          connectFn: (url, protocols) {
+            socket = IOWebSocketChannel.connect(
+              url,
+              protocols: protocols,
+              // headers: _createHeaders(),
+            );
 
             socket = (socket as WebSocketChannel).forGraphQL();
 
@@ -163,6 +228,14 @@ class ApiController extends DisposableInterface {
         store: StoreController.to.apiStore,
       ),
     );
+    // if (anonToken.value == null) {
+    //   String? _getAnonToken = await getAnonToken();
+
+    //   if (_getAnonToken != null) {
+    //     StoreController.to.saveAnonToken(_getAnonToken);
+    //     anonToken.value = _getAnonToken;
+    //   }
+    // }
 
     String? lastToken;
 
@@ -199,7 +272,7 @@ class ApiController extends DisposableInterface {
         case 'connection_ack':
           UserController.to.unsubscribe();
           UserController.to.subscribe();
-          _recconectController.add('event');
+          _reconnectController.add('event');
           break;
         default:
       }
@@ -224,8 +297,9 @@ class ApiController extends DisposableInterface {
       log('token refreshed', name: 'ApiController');
       socketLink.connectOrReconnect();
       isRefreshing = false;
-    } catch (error) {
+    } catch (error, stackTrace) {
       log(_authTokenRefreshRoute, name: 'ApiController', error: error);
+      // EH.ErrorHandler.sendErrorToSentry(error, stackTrace);
       isRefreshing = false;
     }
   }
@@ -251,15 +325,18 @@ class ApiController extends DisposableInterface {
     await UserController.to.loadUser();
   }
 
-  Future<void> logout() async {
+  Future<bool> logout() async {
     final isAuth = token.value != null;
     token.value = null;
+    return token.value == null;
+
     // if (FirebaseAuth.instance.currentUser != null) {
     //   await FirebaseAuth.instance.signOut();
     // }
-    if (isAuth)
-      await _dio.post(_authLogoutRoute,
-          queryParameters: {'refresh_token': token.value?.refreshToken});
+    // if (isAuth) {
+    //   await _dio.post(_authLogoutRoute,
+    //       queryParameters: {'refresh_token': token.value?.refreshToken});
+    // }
   }
 
   // Future<void> loginByFirebase() async {
@@ -282,17 +359,34 @@ class ApiController extends DisposableInterface {
   //   );
   // }
 
-  Future<void> sendCode(String phone) async {
-    final result = await _dio.post(_sendCode, data: {
+  Future<String?> getAnonToken() async {
+    try {
+      final result = await _dio.post(_anonToken, data: {});
+
+      return result.data;
+    } catch (error) {
+      log(_anonToken, name: 'ApiController', error: error);
+    }
+    return null;
+  }
+
+  Future<void> callUser(String phone) async {
+    final result = await _dio.post(_callUser, data: {
       'phone_number': phone,
     });
   }
 
-  Future<void> loginWithSms(String code, String phone) async {
+  Future<void> sendCall(String phone) async {
+    final result = await _dio.post(_authCall, data: {
+      'phone_number': phone,
+    });
+  }
+
+  Future<void> loginWithCall(String code, String phone) async {
     final result = await _dio.post(
-      _authLoginWithSms,
+      _authCallLogin,
       data: {
-        'otp': code,
+        'code': code,
         'phone_number': phone,
       },
     );
@@ -305,8 +399,44 @@ class ApiController extends DisposableInterface {
     await UserController.to.loadUser();
   }
 
+  Future<void> loginWithSms(String code, String phone) async {
+    final result = await _dio.post(
+      _authLoginWithSms,
+      data: {
+        'code': code,
+        'phone_number': phone,
+      },
+    );
+    token.value = AuthToken(
+      accessToken: result.data['jwt_token'],
+      expiresIn: result.data['jwt_expires_in'],
+      refreshToken: result.data['refresh_token'],
+    );
+
+    await UserController.to.loadUser();
+  }
+
+  Future<void> loginWithQrCode(String qrCode) async {
+    final result = await _dio.post(
+      _authLoginWithQrCode,
+      data: {
+        'qr_code': qrCode,
+      },
+    );
+    token.value = AuthToken(
+      accessToken: result.data['jwt_token'],
+      expiresIn: result.data['jwt_expires_in'],
+      refreshToken: result.data['refresh_token'],
+    );
+
+    await UserController.to.loadUser();
+  }
+
   Map<String, String> _createHeaders() => accessToken != null
-      ? <String, String>{'Authorization': 'Bearer $accessToken'}
+      ? <String, String>{
+          'Authorization': 'Bearer $accessToken',
+          'x-hasura-role': 'BUYER',
+        }
       : {};
 }
 
